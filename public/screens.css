@@ -279,3 +279,54 @@ select.field {appearance: none; background-image: none}
 .tab.on svg {fill: currentColor; fill-opacity: .25}
 .tab.ai .pill {color: rgb(var(--accent))}
 .faq-top .a.clip {display: -webkit-box}
+
+/* Forum and Tanya AI: one camera photo, chosen before sending. */
+[data-photo-control] .lbl {display: block}
+.photo-row {display: flex; align-items: center; gap: 12px; flex-wrap: wrap}
+.photo-thumb {
+  display: block;
+  width: 72px;
+  height: 72px;
+  flex: none;
+  border-radius: 12px;
+  border: 1px solid rgb(var(--line));
+  background: rgb(var(--raised));
+  object-fit: cover;
+}
+.photo, .photo-reply {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  margin-top: 12px;
+  border-radius: 12px;
+  border: 1px solid rgb(var(--line));
+  background: rgb(var(--raised));
+  object-fit: contain;
+}
+.photo-reply {max-height: 240px}
+.bubble-photo {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  max-height: 180px;
+  margin: 0 0 8px;
+  border-radius: 10px;
+  background: rgb(var(--raised));
+  object-fit: cover;
+}
+.photo-broken {
+  margin-top: 12px;
+  padding: 12px;
+  font-size: 16px;
+  line-height: 24px;
+  color: rgb(var(--muted));
+  border: 1px dashed rgb(var(--line));
+  border-radius: 12px;
+}
+.chat-note {
+  align-self: flex-start;
+  margin-top: -6px;
+  font-size: 15px;
+  line-height: 21px;
+  color: rgb(var(--muted));
+}

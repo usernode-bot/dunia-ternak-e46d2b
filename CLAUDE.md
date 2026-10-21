@@ -133,6 +133,10 @@ change follows it, and updates it when a request changes the look on purpose.
 - **Type scale:** screen titles are `text-heading` (20/28), `text-body`
   (18/26), `text-small` (16/22), captions 14 px at the smallest. Body text is
   18 px on purpose.
+- **Photos:** a chosen photo is a 72 px square preview (12 px corners, line
+  border); in a post it fills the column (max 360 px tall), in a reply it is
+  the same narrower (240 px), and in a chat bubble it sits at the top of the
+  bubble (max 240 px wide). No new colours.
 - **Layout:** each tab's header has a small title (the FAQ one with a
   time-of-day greeting) and an ⓘ button that opens the safety note
   ("Informasi umum, bukan pengganti dokter hewan. ..."). The tab's content
@@ -183,6 +187,13 @@ Re-theme by changing the token values there, keeping every text pair at
   `forum_reports` only records reports; nothing is hidden automatically.
 - `is_demo` rows are staging sample data: they are only returned when
   `USERNODE_ENV=staging` and the page is opened with `?demo=1`.
+- Forum questions and replies, and a Tanya AI question, may carry **one**
+  optional photo. The browser shrinks it and uploads it with
+  `usernode.uploadFile`; rows store only `photo_url` and `photo_id` (never
+  image bytes), and the server accepts a URL only on the platform's own
+  `/app-files/<32-hex id>` path. Demos seed a data URI, which the server
+  rejects from clients. Photo upload needs the Homeroom shell; outside it the
+  control is replaced by a short note.
 - The AI prompt is server-side (`AI_SYSTEM_PROMPT` in `server.js`) and must
   keep telling the model to decline the platform's content-rule topics and
   never to give doses of strong or prescription drugs.

@@ -147,6 +147,7 @@
           <input id="post-title" class="field" maxlength="120" placeholder="mis. Kambing tidak mau makan" required>
           <label class="lbl" for="post-body">Pertanyaan</label>
           <textarea id="post-body" class="field ta" maxlength="2000" placeholder="Ceritakan kondisi ternakmu" required></textarea>
+          <div data-photo-control="post" data-label="Foto ternak (tidak wajib)"></div>
           <label class="lbl" for="post-nick">Nama panggilan</label>
           <input id="post-nick" class="field" maxlength="40" placeholder="mis. Pak Tani" required>
           <div class="acts">
@@ -205,6 +206,7 @@
         <div class="composer">
           <label class="lbl" for="ai-input">Pertanyaanmu</label>
           <textarea id="ai-input" class="field ta" maxlength="2000" placeholder="mis. Kambing saya kembung, apa yang harus dilakukan?"></textarea>
+          <div data-photo-control="ai" data-label="Foto (tidak wajib)"></div>
           <div class="acts">
             <button type="button" class="btn-primary" id="ai-send">Kirim</button>
           </div>
@@ -256,6 +258,217 @@
       down: '<svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
     };
     var SPARK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>';
+    var CAMERA = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+
+    // ── Camera photo (forum and Tanya AI) ──────────────────────────────────
+    // The photo is uploaded to the platform's file storage and only its URL
+    // and id are stored. Uploads need the Homeroom shell, so outside it the
+    // controls say so instead of offering a button that cannot work.
+    function canUpload() {
+      return window.parent !== window && !!(window.usernode && typeof window.usernode.uploadFile === 'function');
+    }
+
+    var postPhoto = { state: 'idle' };
+    var aiPhoto = { state: 'idle' };
+    var replyPhotos = {};
+
+    function photoFor(key) {
+      if (key === 'post') return postPhoto;
+      if (key === 'ai') return aiPhoto;
+      var id = Number(key.slice('reply-'.length));
+      if (!replyPhotos[id]) replyPhotos[id] = { state: 'idle' };
+      return replyPhotos[id];
+    }
+
+    function renderPhotoControls() {
+      document.querySelectorAll('[data-photo-control]').forEach(function (el) {
+        var key = el.getAttribute('data-photo-control');
+        var st = photoFor(key);
+        var html;
+        if (!canUpload()) {
+          html = '<p class="msg">Foto hanya bisa dikirim dari aplikasi Homeroom.</p>';
+        } else {
+          html = '<span class="lbl">' + esc(el.getAttribute('data-label') || 'Foto (tidak wajib)') + '</span>';
+          if (st.state === 'uploading') {
+            html += '<div class="photo-row"><span class="photo-thumb photo-skeleton skeleton" aria-hidden="true"></span><p class="msg" role="status">Mengunggah foto...</p></div>';
+          } else if (st.state === 'ready') {
+            html += '<div class="photo-row"><img class="photo-thumb" src="' + esc(st.url) + '" alt="Foto yang akan dikirim">' +
+              '<button type="button" class="ghost" data-photo-remove>Hapus foto</button></div>';
+          } else {
+            html += '<div class="photo-row"><button type="button" class="btn-secondary sm" data-photo-add>' + CAMERA + 'Ambil foto</button></div>';
+          }
+          if (st.state === 'error' && st.message) {
+            html += '<p class="msg-err" role="alert">' + esc(st.message) + '</p>';
+          }
+          html += '<input type="file" accept="image/*" capture="environment" data-photo-input hidden aria-label="Ambil foto">';
+        }
+        el.innerHTML = html;
+      });
+      var postSubmit = document.getElementById('post-submit');
+      if (postSubmit) postSubmit.disabled = postPhoto.state === 'uploading';
+      if (aiSend) aiSend.disabled = aiBusy || aiPhoto.state === 'uploading';
+      document.querySelectorAll('[data-action="reply"]').forEach(function (btn) {
+        var st = replyPhotos[Number(btn.getAttribute('data-id'))];
+        if (st && st.state === 'uploading') btn.disabled = true;
+      });
+    }
+
+    // Camera photos are large; shrink them on the phone before uploading so a
+    // weak-signal farmer can still send one under the platform's 5 MB limit.
+    function loadPhotoSource(file) {
+      if (typeof createImageBitmap === 'function') {
+        return createImageBitmap(file).catch(function () { return loadPhotoElement(file); });
+      }
+      return loadPhotoElement(file);
+    }
+
+    function loadPhotoElement(file) {
+      return new Promise(function (resolve, reject) {
+        var url = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function () { img.photoUrl = url; resolve(img); };
+        img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
+        img.src = url;
+      });
+    }
+
+    function canvasBlob(canvas, quality) {
+      return new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', quality); });
+    }
+
+    async function shrinkPhoto(file) {
+      var src = await loadPhotoSource(file);
+      var close = typeof src.close === 'function' ? function () { src.close(); } : function () {};
+      try {
+        var width = src.width || src.naturalWidth;
+        var height = src.height || src.naturalHeight;
+        if (!width || !height) throw new Error('decode');
+        var longest = Math.max(width, height);
+        var attempts = [[1280, 0.8], [960, 0.7]];
+        var blob = null;
+        for (var i = 0; i < attempts.length; i++) {
+          var scale = Math.min(1, attempts[i][0] / longest);
+          var w = Math.max(1, Math.round(width * scale));
+          var h = Math.max(1, Math.round(height * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(src, 0, 0, w, h);
+          blob = await canvasBlob(canvas, attempts[i][1]);
+          if (blob && blob.size <= 5 * 1024 * 1024) break;
+        }
+        if (!blob) throw new Error('encode');
+        return new File([blob], 'foto-ternak.jpg', { type: 'image/jpeg' });
+      } finally {
+        close();
+        if (src.photoUrl) URL.revokeObjectURL(src.photoUrl);
+      }
+    }
+
+    function photoErrorMessage(err) {
+      var code = err && err.code;
+      if (code === 'file_too_large') return 'Foto terlalu besar. Coba ambil foto lagi.';
+      if (code === 'invalid_image') return 'Foto tidak bisa dipakai. Coba ambil foto lagi.';
+      if (code === 'user_quota_exceeded' || code === 'app_quota_exceeded' || code === 'staging_quota_exceeded') {
+        return 'Tempat penyimpanan foto sudah penuh. Kirim tanpa foto dulu.';
+      }
+      return 'Foto gagal diunggah. Periksa koneksi lalu coba lagi.';
+    }
+
+    function deleteUpload(id) {
+      if (!id) return;
+      try {
+        if (window.usernode && typeof window.usernode.deleteFile === 'function') {
+          window.usernode.deleteFile(id).catch(function () {});
+        }
+      } catch (e) {}
+    }
+
+    function resetPhoto(key, removeUpload) {
+      var st = photoFor(key);
+      var id = st.id;
+      st.state = 'idle';
+      st.url = '';
+      st.id = '';
+      st.message = '';
+      if (removeUpload) deleteUpload(id);
+      renderPhotoControls();
+    }
+
+    async function usePhoto(key, file) {
+      var st = photoFor(key);
+      if (st.id) deleteUpload(st.id);
+      st.state = 'uploading';
+      st.url = '';
+      st.id = '';
+      st.message = '';
+      renderPhotoControls();
+      var shrunk;
+      try {
+        shrunk = await shrinkPhoto(file);
+      } catch (err) {
+        st.state = 'error';
+        st.message = 'Foto tidak bisa dibuka. Coba ambil foto lagi.';
+        renderPhotoControls();
+        return;
+      }
+      try {
+        var stored = await window.usernode.uploadFile(shrunk, { visibility: 'public' });
+        if (!stored || !stored.url || !stored.id) throw new Error('no_file');
+        st.state = 'ready';
+        st.url = stored.url;
+        st.id = stored.id;
+      } catch (err) {
+        st.state = 'error';
+        st.message = photoErrorMessage(err);
+      }
+      renderPhotoControls();
+    }
+
+    function photoPayload(key) {
+      var st = photoFor(key);
+      return st.state === 'ready' ? { photo_url: st.url, photo_id: st.id } : {};
+    }
+
+    function photoImg(url, alt, cls) {
+      return '<img class="' + cls + '" src="' + esc(url) + '" alt="' + esc(alt) + '" loading="lazy" decoding="async">';
+    }
+
+    document.addEventListener('click', function (ev) {
+      var add = ev.target.closest('[data-photo-add]');
+      if (add) {
+        ev.preventDefault();
+        var holder = add.closest('[data-photo-control]');
+        var input = holder && holder.querySelector('[data-photo-input]');
+        if (input) input.click();
+        return;
+      }
+      var rem = ev.target.closest('[data-photo-remove]');
+      if (rem) {
+        ev.preventDefault();
+        var box = rem.closest('[data-photo-control]');
+        if (box) resetPhoto(box.getAttribute('data-photo-control'), true);
+      }
+    });
+
+    document.addEventListener('change', function (ev) {
+      var input = ev.target && ev.target.closest ? ev.target.closest('[data-photo-input]') : null;
+      if (!input) return;
+      var box = input.closest('[data-photo-control]');
+      var file = input.files && input.files[0];
+      if (box && file) usePhoto(box.getAttribute('data-photo-control'), file);
+    });
+
+    // A photo the platform no longer has (a staging copy of a production URL,
+    // a file removed by moderation) says so instead of a broken image.
+    document.addEventListener('error', function (ev) {
+      var img = ev.target;
+      if (!img || img.tagName !== 'IMG' || !img.classList.contains('photo-img')) return;
+      var broken = document.createElement('p');
+      broken.className = 'photo-broken';
+      broken.textContent = 'Foto tidak bisa dimuat.';
+      if (img.parentNode) img.parentNode.replaceChild(broken, img);
+    }, true);
 
     // ── Tabs ───────────────────────────────────────────────────────────────
     var TABS = ['faq', 'forum', 'ai'];
@@ -679,18 +892,24 @@
       forumList.innerHTML = shownPosts().map(function (p) {
         var open = !!openPosts[p.id];
         var mine = p.mine;
+        var author = mine ? 'Kamu' : p.nickname;
         var replies = p.replies.map(function (r) {
           return '<div class="rep"><div class="meta"><b>' + esc(r.nickname) + '</b> · ' + esc(waktu(r.created_at)) +
-            (r.mine ? ' · <button type="button" class="ghost inline" data-action="delete-reply" data-id="' + r.id + '">Hapus</button>' : '') +
-            '</div><p>' + esc(r.body) + '</p></div>';
+            (r.mine ? ' · <button type="button" class="ghost inline" data-action="delete-reply" data-id="' + r.id + '">Hapus</button>'
+                    : ' · <button type="button" class="ghost inline" data-action="report-reply" data-id="' + r.id + '">Laporkan</button>') +
+            '</div><p>' + esc(r.body) + '</p>' +
+            (r.photo_url ? photoImg(r.photo_url, 'Foto dari ' + (r.mine ? 'Kamu' : r.nickname), 'photo photo-reply photo-img') : '') +
+            '</div>';
         }).join('');
-        return '<li class="list-row" data-post="' + p.id + '">' +
+        return '<li class="list-row" data-post="' + p.id + '"' + (p.photo_url ? ' data-has-photo' : '') + '>' +
           '<span class="ic ' + esc(p.category) + '">' + (ICONS[p.category] || ICONS.umum) + '</span>' +
           '<div class="m">' +
             '<div class="t" role="button" tabindex="0" aria-expanded="' + (open ? 'true' : 'false') + '" data-toggle="' + p.id + '">' + esc(p.title) + '</div>' +
-            '<div class="meta">' + (mine ? 'Kamu' : esc(p.nickname)) + ' · ' + esc(waktu(p.created_at)) + ' · ' + repliesLabel(p.replies.length) + '</div>' +
+            '<div class="meta">' + (mine ? 'Kamu' : esc(p.nickname)) + ' · ' + esc(waktu(p.created_at)) + ' · ' + repliesLabel(p.replies.length) +
+              (p.photo_url ? ' · ada foto' : '') + '</div>' +
             (open ?
               '<p class="body">' + esc(p.body) + '</p>' +
+              (p.photo_url ? photoImg(p.photo_url, 'Foto dari ' + author, 'photo photo-img') : '') +
               '<div class="acts">' +
                 '<button type="button" class="btn-secondary sm" data-action="ai" data-id="' + p.id + '">' + SPARK + 'Tanya AI</button>' +
                 '<button type="button" class="ghost" data-action="report-post" data-id="' + p.id + '">Laporkan</button>' +
@@ -700,12 +919,14 @@
               replies +
               '<div class="lbl">Balasan</div>' +
               '<textarea class="field ta" data-reply-body maxlength="2000" placeholder="Tulis balasan"></textarea>' +
+              '<div data-photo-control="reply-' + p.id + '" data-label="Foto (tidak wajib)"></div>' +
               '<div class="lbl">Nama panggilan</div>' +
               '<input class="field" data-reply-nick maxlength="40" placeholder="mis. Pak Tani">' +
               '<div class="acts"><button type="button" class="btn-secondary" data-action="reply" data-id="' + p.id + '">Kirim balasan</button></div>'
             : '') +
           '</div></li>';
       }).join('');
+      renderPhotoControls();
     }
 
     async function loadPosts() {
@@ -741,6 +962,8 @@
       postErr.hidden = true;
       if (postsReady) syncForumStates();
       else forumNew.hidden = posts.length === 0;
+      // Batal takes the chosen photo off again, and deletes the upload.
+      if (postPhoto.state !== 'idle') resetPhoto('post', true);
     }
     forumNew.addEventListener('click', openForm);
     document.getElementById('forum-empty-new').addEventListener('click', openForm);
@@ -770,6 +993,7 @@
         body: document.getElementById('post-body').value.trim(),
         nickname: document.getElementById('post-nick').value.trim()
       };
+      Object.assign(payload, photoPayload('post'));
       if (!payload.title || !payload.body || !payload.nickname) {
         setFormError('Isi judul, pertanyaan, dan nama panggilan.');
         return;
@@ -789,6 +1013,7 @@
         var created = await res.json();
         postForm.reset();
         document.getElementById('post-category').value = 'umum';
+        resetPhoto('post', false);
         closeForm();
         await loadPosts();
         if (created && created.id) {
@@ -856,6 +1081,7 @@
         try {
           var d = await api('/api/posts/' + postId, { method: 'DELETE' });
           if (!d.ok) throw new Error('HTTP ' + d.status);
+          if (post) deleteUpload(post.photo_id);
           delete openPosts[postId];
           await loadPosts();
         } catch (err) {
@@ -864,11 +1090,29 @@
         return;
       }
 
+      if (action === 'report-reply') {
+        btn.disabled = true;
+        try {
+          var rep = await api('/api/reports', { method: 'POST', body: JSON.stringify({ kind: 'reply', target_id: postId }) });
+          btn.textContent = rep.status === 401 ? 'Perlu akun Homeroom' : 'Laporan terkirim';
+        } catch (err) {
+          btn.disabled = false;
+          var hostPost = btn.closest('[data-post]');
+          if (hostPost) statusFor(Number(hostPost.getAttribute('data-post')), 'Laporan gagal dikirim. Coba lagi.');
+        }
+        return;
+      }
+
       if (action === 'delete-reply') {
         if (!confirm('Hapus balasan ini?')) return;
+        var ownReply = null;
+        posts.forEach(function (p) {
+          p.replies.forEach(function (r) { if (r.id === postId) ownReply = r; });
+        });
         try {
           var dr = await api('/api/replies/' + postId, { method: 'DELETE' });
           if (!dr.ok) throw new Error('HTTP ' + dr.status);
+          if (ownReply) deleteUpload(ownReply.photo_id);
           await loadPosts();
         } catch (err) {
           statusFor(postId, 'Balasan gagal dihapus. Coba lagi.');
@@ -886,15 +1130,18 @@
         }
         btn.disabled = true;
         try {
+          var replyPayload = { body: body, nickname: nick };
+          Object.assign(replyPayload, photoPayload('reply-' + postId));
           var rr = await api('/api/posts/' + postId + '/replies', {
             method: 'POST',
-            body: JSON.stringify({ body: body, nickname: nick })
+            body: JSON.stringify(replyPayload)
           });
           if (rr.status === 401) {
             statusFor(postId, 'Kamu perlu akun Homeroom untuk membalas.');
             return;
           }
           if (!rr.ok) throw new Error('HTTP ' + rr.status);
+          resetPhoto('reply-' + postId, false);
           openPosts[postId] = true;
           await loadPosts();
         } catch (err) {
@@ -915,16 +1162,34 @@
     var SUGGEST = ['Sapi tidak mau makan', 'Ayam mencret', 'Kambing kembung', 'Kandang bau'];
     var aiBusy = false;
 
+    // The same drawn sample photo the staging demo forum post carries. It is a
+    // data URI, which the server drops from a real request.
+    var DEMO_PHOTO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">' +
+      '<rect width="320" height="200" fill="#c9dcb4"/><rect y="138" width="320" height="62" fill="#86a865"/>' +
+      '<ellipse cx="170" cy="112" rx="72" ry="36" fill="#efe9dc"/><ellipse cx="170" cy="96" rx="40" ry="12" fill="#d9cdb6"/>' +
+      '<rect x="118" y="132" width="11" height="40" rx="4" fill="#e3dccd"/><rect x="140" y="136" width="11" height="38" rx="4" fill="#e3dccd"/>' +
+      '<rect x="194" y="136" width="11" height="38" rx="4" fill="#e3dccd"/><rect x="216" y="132" width="11" height="40" rx="4" fill="#e3dccd"/>' +
+      '<path d="M96 98 L78 70 L100 62 L114 92 Z" fill="#efe9dc"/>' +
+      '<path d="M84 66 L76 50 M96 62 L94 46" stroke="#8c7a5c" stroke-width="4" stroke-linecap="round"/>' +
+      '<text x="160" y="190" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#3d4a2f">Foto contoh</text>' +
+      '</svg>'
+    );
+
     if (DEMO) {
       aiMsgs = [
-        { role: 'user', content: 'Kambing saya perutnya kembung sebelah kiri dan tidak mau makan sejak pagi. Apa yang harus saya lakukan?' },
-        { role: 'assistant', content: 'Kembung yang membesar di sisi kiri bisa berbahaya karena gas sulit keluar.\n\nYang bisa dilakukan sekarang: hentikan pakan beragi dan rumput basah, ajak kambing berjalan pelan, dan pastikan air bersih tersedia.\n\nKarena kambing sudah tidak mau makan dan perutnya membesar, sebaiknya segera hubungi dokter hewan atau mantri terdekat. Ini contoh jawaban di pratinjau; di aplikasi sungguhan jawaban datang dari AI.' }
+        { role: 'user', content: 'Bulu kambing saya rontok di punggung. Ini kenapa?', photo_url: DEMO_PHOTO },
+        { role: 'assistant', content: 'Di foto terlihat bulu menipis di punggung, tapi foto saja tidak cukup untuk memastikan penyebabnya.\n\nYang sering terjadi adalah kutu, jamur, atau kurang mineral. Periksa kulit dari dekat, jaga kandang tetap kering, dan ganti alas kandang secara rutin.\n\nKalau bercaknya menyebar atau kambing makin lemas, minta mantri memeriksanya. Ini contoh jawaban di pratinjau; di aplikasi sungguhan jawaban datang dari AI.' }
       ];
     }
 
     function renderChat() {
       var html = aiMsgs.map(function (m) {
-        return '<div class="bubble ' + (m.role === 'user' ? 'me' : 'ai') + '">' + esc(m.content) + '</div>';
+        var photo = m.photo_url
+          ? '<img class="bubble-photo photo-img" src="' + esc(m.photo_url) + '" alt="Foto yang kamu kirim" loading="lazy" decoding="async">'
+          : '';
+        var note = m.role === 'assistant' && m.note ? '<p class="chat-note">' + esc(m.note) + '</p>' : '';
+        return '<div class="bubble ' + (m.role === 'user' ? 'me' : 'ai') + '">' + photo + esc(m.content) + '</div>' + note;
       }).join('');
       if (aiMsgs.length === 0) {
         html = '<p class="chat-hint">Tulis pertanyaan soal ternakmu di bawah. Untuk hewan yang sakit parah, hubungi dokter hewan.</p>';
@@ -988,27 +1253,48 @@
         if (!res.ok || !data.text) {
           throw new Error('HTTP ' + res.status);
         }
-        aiMsgs.push({ role: 'assistant', content: data.text });
+        var askedWithPhoto = aiMsgs.some(function (m) { return m.role === 'user' && m.photo_url; });
+        aiMsgs.push({
+          role: 'assistant',
+          content: data.text,
+          note: askedWithPhoto && data.photo_seen === false
+            ? 'AI tidak bisa melihat fotonya, jadi jawaban ini hanya dari tulisanmu.'
+            : ''
+        });
         ok = true;
       } catch (err) {
         aiErrorShow('Jawaban gagal dimuat. Periksa koneksi lalu coba lagi.');
       } finally {
         aiBusy = false;
         if (!ok && !handedOff) {
-          // Keep the typed question so it can be sent again.
+          // Keep the typed question, and its photo, so it can be sent again.
           var last = aiMsgs[aiMsgs.length - 1];
-          if (last && last.role === 'user' && !aiInput.value) aiInput.value = last.content;
+          if (last && last.role === 'user') {
+            if (!aiInput.value) aiInput.value = last.content;
+            if (last.photo_id && aiPhoto.state === 'idle') {
+              aiPhoto.state = 'ready';
+              aiPhoto.url = last.photo_url;
+              aiPhoto.id = last.photo_id;
+            }
+          }
           aiMsgs.pop();
         }
         renderChat();
+        renderPhotoControls();
       }
     }
 
     function sendAI() {
       var text = aiInput.value.trim();
-      if (!text || aiBusy) return;
-      aiMsgs.push({ role: 'user', content: text });
+      if (!text || aiBusy || aiPhoto.state === 'uploading') return;
+      var message = { role: 'user', content: text };
+      if (aiPhoto.state === 'ready') {
+        message.photo_url = aiPhoto.url;
+        message.photo_id = aiPhoto.id;
+      }
+      aiMsgs.push(message);
       aiInput.value = '';
+      resetPhoto('ai', false);
       askAI(false);
     }
 
@@ -1035,6 +1321,7 @@
     });
 
     // ── Boot ───────────────────────────────────────────────────────────────
+    renderPhotoControls();
     showTab(location.hash.replace('#', ''));
   })();
   </script>

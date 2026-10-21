@@ -49,6 +49,16 @@
       "name": "AI warning",
       "path": "/#ai",
       "expectText": "Jawaban AI bersifat umum dan bisa keliru."
+    },
+    {
+      "name": "Forum photo demo",
+      "path": "/?demo=1#forum",
+      "expectSelector": "[data-post][data-has-photo]"
+    },
+    {
+      "name": "AI photo control",
+      "path": "/#ai",
+      "expectSelector": "#view-ai [data-photo-control]"
     }
   ],
   "visibility": {
