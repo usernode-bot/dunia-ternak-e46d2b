@@ -195,6 +195,10 @@ async function ensureSchema() {
       created_at timestamptz NOT NULL DEFAULT now()
     );
     CREATE INDEX IF NOT EXISTS forum_replies_post ON forum_replies (post_id);
+    ALTER TABLE forum_posts   ADD COLUMN IF NOT EXISTS photo_url text;
+    ALTER TABLE forum_posts   ADD COLUMN IF NOT EXISTS photo_id  text;
+    ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS photo_url text;
+    ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS photo_id  text;
     CREATE TABLE IF NOT EXISTS forum_reports (
       id serial PRIMARY KEY,
       user_id text NOT NULL,
@@ -220,10 +224,65 @@ function iso(value) {
   return value instanceof Date ? value.toISOString() : value;
 }
 
+// A photo is stored as the URL and id the platform's file storage returned
+// (usernode.uploadFile). Image bytes never reach this database. Only a URL on
+// the platform's own /app-files/<id> path is accepted, so a client cannot
+// point the forum at some other host.
+function appFileId(url) {
+  if (typeof url !== 'string' || !url) return null;
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  const allowed = new Set(['https:']);
+  if (PLATFORM_ORIGIN) {
+    try {
+      allowed.add(new URL(PLATFORM_ORIGIN).protocol);
+    } catch {}
+  }
+  if (!allowed.has(parsed.protocol)) return null;
+  if (PLATFORM_ORIGIN) {
+    try {
+      if (parsed.host !== new URL(PLATFORM_ORIGIN).host) return null;
+    } catch {}
+  }
+  const match = /^\/app-files\/([0-9a-f]{32})$/.exec(parsed.pathname);
+  return match ? match[1] : null;
+}
+
+// `null` when no photo was sent, `{ url, id }` when it is usable, `false` when
+// the client sent something that is not a platform file.
+function photoFields(body) {
+  const rawUrl = body && body.photo_url;
+  const url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
+  const rawId = body && body.photo_id;
+  const id = typeof rawId === 'string' ? rawId.trim() : '';
+  if (!url && !id) return null;
+  if (!/^[0-9a-f]{32}$/.test(id)) return false;
+  if (appFileId(url) !== id) return false;
+  return { url, id };
+}
+
 // Staging seed: obviously fake farmers and questions, so the populated
 // forum can be seen. Fixed demo keys make it idempotent; none of it is
 // shown unless the staging preview is opened with ?demo=1.
 const DEMO_HOURS = (h) => new Date(Date.now() - Math.round(h * 3600_000));
+
+// A drawn sample photo for the staging demo, as a data URI: platform files are
+// not cloned into staging, so a demo row cannot point at a real /app-files/ URL.
+const DEMO_PHOTO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">' +
+  '<rect width="320" height="200" fill="#c9dcb4"/><rect y="138" width="320" height="62" fill="#86a865"/>' +
+  '<ellipse cx="170" cy="112" rx="72" ry="36" fill="#efe9dc"/><ellipse cx="170" cy="96" rx="40" ry="12" fill="#d9cdb6"/>' +
+  '<rect x="118" y="132" width="11" height="40" rx="4" fill="#e3dccd"/><rect x="140" y="136" width="11" height="38" rx="4" fill="#e3dccd"/>' +
+  '<rect x="194" y="136" width="11" height="38" rx="4" fill="#e3dccd"/><rect x="216" y="132" width="11" height="40" rx="4" fill="#e3dccd"/>' +
+  '<path d="M96 98 L78 70 L100 62 L114 92 Z" fill="#efe9dc"/>' +
+  '<path d="M84 66 L76 50 M96 62 L94 46" stroke="#8c7a5c" stroke-width="4" stroke-linecap="round"/>' +
+  '<text x="160" y="190" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#3d4a2f">Foto contoh</text>' +
+  '</svg>'
+);
 const DEMO_POSTS = [
   {
     key: 'p1', user: 'demo:pak-contoh', nick: 'Pak Contoh', cat: 'kambing', hours: 2,
@@ -291,6 +350,15 @@ const DEMO_POSTS = [
       { user: 'demo:ibu-fiktif', nick: 'Ibu Fiktif', hours: 130, body: 'Sekam yang diganti rutin lebih aman. Kapur boleh sesekali, jangan sampai berdebu tebal.' },
     ],
   },
+  {
+    key: 'p9', user: 'demo:ibu-fiktif', nick: 'Ibu Fiktif', cat: 'kambing', hours: 1,
+    title: 'Bulu kambing rontok di punggung, kenapa ya?',
+    body: 'Kulitnya tidak luka, kambing masih mau makan. Apa karena kutu atau pakan?',
+    photo: DEMO_PHOTO,
+    replies: [
+      { user: 'demo:bu-uji', nick: 'Bu Uji Coba', hours: 0.5, body: 'Bisa karena kutu atau jamur. Periksa ke mantri supaya tahu pastinya, dan jaga kandang tetap kering.' },
+    ],
+  },
 ];
 
 const OWN_DEMO_POST = {
@@ -304,11 +372,11 @@ async function seedDemoForum() {
   for (const p of DEMO_POSTS) {
     const when = DEMO_HOURS(p.hours);
     const inserted = await pool.query(
-      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, demo_key, created_at)
-       VALUES ($1,$2,$3,$4,$5,true,$6,$7)
+      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, demo_key, created_at, photo_url)
+       VALUES ($1,$2,$3,$4,$5,true,$6,$7,$8)
        ON CONFLICT (user_id, demo_key) DO NOTHING
        RETURNING id`,
-      [p.user, p.nick, p.cat, p.title, p.body, p.key, when]
+      [p.user, p.nick, p.cat, p.title, p.body, p.key, when, p.photo || null]
     );
     let postId = inserted.rows[0] && inserted.rows[0].id;
     if (!postId) {
@@ -361,7 +429,7 @@ app.get('/api/posts', async (req, res) => {
     if (demo) await ensureOwnDemoPost(userId);
     const posts = await pool.query(
       `SELECT id, user_id, nickname, category, title, body, created_at,
-              (user_id = $1) AS mine
+              photo_url, photo_id, (user_id = $1) AS mine
        FROM forum_posts
        WHERE (NOT is_demo OR $2::boolean)
        ORDER BY created_at DESC, id DESC`,
@@ -372,7 +440,8 @@ app.get('/api/posts', async (req, res) => {
     if (ids.length) {
       replies = (
         await pool.query(
-          `SELECT id, post_id, user_id, nickname, body, created_at, (user_id = $1) AS mine
+          `SELECT id, post_id, user_id, nickname, body, created_at,
+                  photo_url, photo_id, (user_id = $1) AS mine
            FROM forum_replies
            WHERE post_id = ANY($2::int[])
            ORDER BY created_at ASC, id ASC`,
@@ -389,6 +458,8 @@ app.get('/api/posts', async (req, res) => {
         body: p.body,
         created_at: iso(p.created_at),
         mine: p.mine === true,
+        photo_url: p.photo_url || null,
+        photo_id: p.photo_id || null,
         replies: replies
           .filter((r) => r.post_id === p.id)
           .map((r) => ({
@@ -397,6 +468,8 @@ app.get('/api/posts', async (req, res) => {
             body: r.body,
             created_at: iso(r.created_at),
             mine: r.mine === true,
+            photo_url: r.photo_url || null,
+            photo_id: r.photo_id || null,
           })),
       })),
     });
@@ -414,12 +487,14 @@ app.post('/api/posts', async (req, res) => {
   if (!CATEGORIES.has(category) || !title || !body || !nickname) {
     return res.status(400).json({ error: 'invalid_post' });
   }
+  const photo = photoFields(req.body);
+  if (photo === false) return res.status(400).json({ error: 'invalid_photo' });
   try {
     const result = await pool.query(
-      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo)
-       VALUES ($1,$2,$3,$4,$5,false)
+      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, photo_url, photo_id)
+       VALUES ($1,$2,$3,$4,$5,false,$6,$7)
        RETURNING id, created_at`,
-      [req.user.id, nickname, category, title, body]
+      [req.user.id, nickname, category, title, body, photo ? photo.url : null, photo ? photo.id : null]
     );
     res.status(201).json({ id: result.rows[0].id, created_at: iso(result.rows[0].created_at) });
   } catch (err) {
@@ -435,14 +510,16 @@ app.post('/api/posts/:id/replies', async (req, res) => {
   if (!Number.isInteger(id) || id <= 0 || !body || !nickname) {
     return res.status(400).json({ error: 'invalid_reply' });
   }
+  const photo = photoFields(req.body);
+  if (photo === false) return res.status(400).json({ error: 'invalid_photo' });
   try {
     const exists = await pool.query('SELECT 1 FROM forum_posts WHERE id = $1', [id]);
     if (!exists.rowCount) return res.status(404).json({ error: 'not_found' });
     const result = await pool.query(
-      `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo)
-       VALUES ($1,$2,$3,$4,false)
+      `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo, photo_url, photo_id)
+       VALUES ($1,$2,$3,$4,false,$5,$6)
        RETURNING id`,
-      [id, req.user.id, nickname, body]
+      [id, req.user.id, nickname, body, photo ? photo.url : null, photo ? photo.id : null]
     );
     res.status(201).json({ id: result.rows[0].id });
   } catch (err) {
@@ -528,8 +605,72 @@ const AI_SYSTEM_PROMPT = [
   '  dan tolak topik di luar peternakan. Untuk topik seperti itu, tolak dengan sopan dan singkat',
   '  tanpa menjelaskannya, lalu tawarkan kembali membantu soal ternak.',
   '- Hindari diagnosis pasti; sebut kemungkinan dan langkah yang aman.',
+  '- Peternak bisa mengirim foto ternak. Jelaskan hanya apa yang terlihat dan berkaitan dengan',
+  '  ternak, kandang atau pakan, dan katakan bahwa foto tidak cukup untuk diagnosis pasti.',
+  '- Jika foto tidak berisi ternak, kandang atau pakan, atau berisi hal yang dilarang di atas,',
+  '  jangan jelaskan isinya: tolak dengan sopan dan minta foto ternak.',
   '- Ingatkan, bila perlu, bahwa ini informasi umum dan bukan pengganti dokter hewan.',
 ].join('\n');
+
+const AI_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+
+// The newest photo in a chat, as the base64 image block the proxy takes. Only
+// the newest one is sent, to keep each question cheap on the daily AI budget.
+async function fetchAiPhoto(url) {
+  try {
+    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    const type = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+    if (!AI_IMAGE_TYPES.has(type)) return null;
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (!buf.length || buf.length > 5 * 1024 * 1024) return null;
+    return { mediaType: type, data: buf.toString('base64') };
+  } catch {
+    return null;
+  }
+}
+
+const PHOTO_SENT_NOTE = ' (Peternak mengirim foto di pesan ini.)';
+const PHOTO_FAILED_NOTE = ' (Foto tidak bisa dibuka.)';
+
+function aiMessages(messages, imageIndex, image, photoFailed) {
+  return messages.map((m, i) => {
+    if (i === imageIndex && image) {
+      return {
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } },
+          { type: 'text', text: m.content },
+        ],
+      };
+    }
+    if (m.photo_url) {
+      const note = i === imageIndex && photoFailed ? PHOTO_FAILED_NOTE : PHOTO_SENT_NOTE;
+      return { role: m.role, content: m.content + note };
+    }
+    return { role: m.role, content: m.content };
+  });
+}
+
+async function callAiProxy(userToken, messages) {
+  const upstream = await fetch(LLM_PROXY_URL + '/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'x-usernode-app-token': LLM_PROXY_TOKEN,
+      'x-usernode-user-token': userToken || '',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-5-5',
+      max_tokens: 600,
+      system: AI_SYSTEM_PROMPT,
+      messages,
+    }),
+  });
+  const data = await upstream.json().catch(() => ({}));
+  return { upstream, data };
+}
 
 app.post('/api/ai', async (req, res) => {
   const incoming = req.body && req.body.messages;
@@ -537,28 +678,38 @@ app.post('/api/ai', async (req, res) => {
   const messages = incoming
     .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
     .slice(-10)
-    .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }))
+    .map((m) => ({
+      role: m.role,
+      content: m.content.slice(0, 4000),
+      // A photo on an assistant message is not a thing; drop anything whose
+      // URL is not one of the platform's own files.
+      photo_url: m.role === 'user' && appFileId(m.photo_url) ? m.photo_url : null,
+    }))
     .filter((m) => m.content.trim().length > 0);
   if (!messages.length) return res.status(400).json({ error: 'messages_required' });
   if (!LLM_PROXY_URL || !LLM_PROXY_TOKEN) return res.status(503).json({ code: 'unavailable' });
 
   try {
-    const upstream = await fetch(LLM_PROXY_URL + '/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'x-usernode-app-token': LLM_PROXY_TOKEN,
-        'x-usernode-user-token': req.headers['x-usernode-token'] || '',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-5-5',
-        max_tokens: 600,
-        system: AI_SYSTEM_PROMPT,
-        messages,
-      }),
-    });
-    const data = await upstream.json().catch(() => ({}));
+    let imageIndex = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'user' && messages[i].photo_url) {
+        imageIndex = i;
+        break;
+      }
+    }
+    const image = imageIndex >= 0 ? await fetchAiPhoto(messages[imageIndex].photo_url) : null;
+    const userToken = req.headers['x-usernode-token'];
+    let { upstream, data } = await callAiProxy(
+      userToken,
+      aiMessages(messages, imageIndex, image, imageIndex >= 0 && !image)
+    );
+    let photoSeen = !!(image && upstream.ok);
+    // The proxy could not take an image (or the image itself failed to load):
+    // ask once more with the text only and say the photo was not opened.
+    if (!upstream.ok && image && !(data && data.code)) {
+      photoSeen = false;
+      ({ upstream, data } = await callAiProxy(userToken, aiMessages(messages, imageIndex, null, true)));
+    }
     if (!upstream.ok) {
       if (data && data.code) return res.status(upstream.status).json({ code: data.code });
       console.warn('AI proxy answered ' + upstream.status);
@@ -570,7 +721,7 @@ app.post('/api/ai', async (req, res) => {
       .join('\n')
       .trim();
     if (!text) return res.status(502).json({ code: 'empty_answer' });
-    res.json({ text });
+    res.json({ text, photo_seen: photoSeen });
   } catch (err) {
     console.warn('AI call failed: ' + err.message);
     res.status(502).json({ code: 'upstream_error' });
