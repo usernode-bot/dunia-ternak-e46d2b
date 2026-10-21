@@ -6,8 +6,11 @@ Homeroom. Satu layar dengan tiga tab:
 - **FAQ**: 15 pertanyaan umum soal sapi, kambing dan domba, ayam, serta
   urusan kandang. Ada kolom cari dan saringan per hewan; tiap pertanyaan
   dibuka dan ditutup dengan sekali ketuk.
-- **Forum**: peternak menulis pertanyaan (judul, isi, nama panggilan) dan
-  membalas pertanyaan orang lain. Postingan terbaru di atas dan tersimpan di
+- **Forum**: peternak menulis pertanyaan (judul, isi, nama panggilan, plus
+  foto ternak bila perlu) dan membalas pertanyaan orang lain, juga dengan
+  foto. Foto diambil lewat kamera HP atau dipilih dari galeri, diperkecil
+  dulu di halaman, lalu disimpan di penyimpanan file Homeroom; yang masuk
+  database hanya tautannya. Postingan terbaru di atas dan tersimpan di
   database, jadi semua pengguna melihatnya. Tiap postingan punya tombol
   Tanya AI, Laporkan, dan Hapus untuk postingan sendiri.
 - **Tanya AI**: percakapan singkat soal ternak lewat layanan AI Homeroom.

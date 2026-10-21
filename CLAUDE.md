@@ -166,8 +166,18 @@ Re-theme by changing the token values there, keeping every text pair at
 - The forum is one shared board. Posts carry a nickname typed each time;
   Homeroom's account (`user_id`) decides who may remove a post or reply.
   `forum_reports` only records reports; nothing is hidden automatically.
+- A post or reply may carry one livestock photo. The page takes it from the
+  phone camera (`<input capture>`, a file picker where there is none),
+  shrinks it to at most 1280 px JPEG, and uploads it with
+  `usernode.uploadFile(..., { visibility: 'public' })`; only the returned
+  URL and file id are stored (`forum_posts.photo_url` / `photo_id`, same on
+  `forum_replies`). The image bytes never reach this app's server or
+  database, and a text-only post stays the default. A photo the user removes
+  or abandons is deleted best-effort with `usernode.deleteFile`.
 - `is_demo` rows are staging sample data: they are only returned when
-  `USERNODE_ENV=staging` and the page is opened with `?demo=1`.
+  `USERNODE_ENV=staging` and the page is opened with `?demo=1`. Demo photos
+  are a small drawn data-URI placeholder in `server.js` (`DEMO_PHOTO`),
+  because platform files are never copied into staging.
 - The AI prompt is server-side (`AI_SYSTEM_PROMPT` in `server.js`) and must
   keep telling the model to decline the platform's content-rule topics and
   never to give doses of strong or prescription drugs.

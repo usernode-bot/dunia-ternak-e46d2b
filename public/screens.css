@@ -210,6 +210,36 @@ select.field {appearance: none; background-image: none}
 .ghost.inline {min-height: 0; padding: 0; font-size: 15px; text-decoration: underline}
 .ghost:focus-visible {outline: 2px solid rgb(var(--focus)); outline-offset: 2px}
 
+/* A livestock photo on a question or reply, and the preview of the one about
+   to be sent. Photos load lazily so a long forum does not eat a weak
+   connection. */
+.photo {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  margin-top: 10px;
+  border: 1px solid rgb(var(--line));
+  border-radius: 12px;
+  background: rgb(var(--raised));
+}
+
+.photo.sm {max-height: 220px; margin-top: 8px}
+
+/* The same photo while its question is collapsed: small enough to keep the
+   list light, lazy so it only loads near the screen. */
+.photo-thumb {display: block; width: 72px; height: 72px; object-fit: cover; margin-top: 8px; border: 1px solid rgb(var(--line)); border-radius: 10px; background: rgb(var(--raised))}
+
+.attach {display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px}
+
+.thumb-wrap {display: flex; align-items: center; gap: 12px; margin-top: 10px}
+
+.thumb {width: 88px; height: 88px; flex: none; object-fit: cover; border: 1px solid rgb(var(--line)); border-radius: 10px; background: rgb(var(--raised))}
+
+.thumb-info {flex: 1; min-width: 0}
+
+.thumb-info .msg, .thumb-info .msg-err {margin-top: 0; margin-bottom: 4px}
+
 /* Tanya AI: the warning stays in view, the chat reads like a conversation. */
 .warn {
   position: sticky;
