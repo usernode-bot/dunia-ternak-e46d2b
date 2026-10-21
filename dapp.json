@@ -23,12 +23,18 @@
       "path": "/?demo=1#forum",
       "expectSelector": "[data-post]",
       "visual": true,
-      "impact": ["public/**"]
+      "impact": [
+        "public/**"
+      ]
     },
     {
       "name": "AI warning",
       "path": "/#ai",
       "expectText": "Jawaban AI bersifat umum dan bisa keliru."
     }
-  ]
+  ],
+  "visibility": {
+    "build": "public",
+    "view": "public"
+  }
 }
