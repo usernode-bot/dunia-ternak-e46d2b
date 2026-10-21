@@ -146,11 +146,11 @@
   max-width: 42rem;
   min-height: 100vh;
   margin: 0 auto;
-  padding-bottom: calc(156px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(176px + env(safe-area-inset-bottom, 0px));
 }
 
-.chips {overflow-x: auto; scrollbar-width: none}
-.chips::-webkit-scrollbar {display: none}
+/* All five animal filters stay visible: they wrap instead of scrolling. */
+.chips {flex-wrap: wrap; overflow: visible}
 
 .foot {
   position: fixed;
@@ -160,8 +160,34 @@
   max-width: 42rem;
   bottom: 0;
   z-index: 20;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
+
+/* The safety note reads as a warning, in the straw colour Tanya AI uses. */
+.foot p {
+  text-align: left;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  color: rgb(var(--fg));
+  background: rgb(var(--straw-bg));
+  border-left: 4px solid rgb(var(--straw));
+  border-radius: 10px;
+  margin: 8px 16px 0;
+  padding: 8px 12px;
+}
+
+/* A closed question shows the first two lines of its answer. */
+.a.clip {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.faq-group + .faq-group {margin-top: 16px}
 
 .chip, .tab, .ask {cursor: pointer; font: inherit}
 
