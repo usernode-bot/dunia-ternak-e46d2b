@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#2f6b3e">
+  <meta name="theme-color" content="#3a6346">
   <script>
   // usernode-dev-console@1
   (function () {
@@ -63,7 +63,7 @@
   })();
   </script>
   <title>TernakKu</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%232f6b3e'/><path d='M30 38l10 6M70 38l-10 6M32 36h36l3 20a21 21 0 0 1-42 0z' fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%233a6346'/><path d='M30 38l10 6M70 38l-10 6M32 36h36l3 20a21 21 0 0 1-42 0z' fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (see tailwind.config.js). npm run
        build compiles it to public/tailwind.css. Write class names as whole
        literals: the compiler finds them by scanning this file. -->
@@ -96,30 +96,40 @@
 
       <!-- ── FAQ ──────────────────────────────────────────────────────── -->
       <main id="view-faq" class="view">
-        <div class="hd"><div><b>TernakKu</b><span>Jawaban praktis untuk peternak kecil</span></div></div>
+        <div class="hd"><div><b>TernakKu</b><span id="greeting">Jawaban praktis untuk peternak kecil</span></div><button type="button" class="info" data-info aria-expanded="false" aria-label="Tentang jawaban di aplikasi ini"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg></button></div>
+        <p class="safety" role="note" hidden>Informasi umum, bukan pengganti dokter hewan. Untuk penyakit menular, hewan darurat, atau obat keras, hubungi dokter hewan atau dinas peternakan.</p>
         <div class="sw">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
           <input id="faq-search" class="field" type="search" placeholder="Cari, mis. kembung" aria-label="Cari pertanyaan">
         </div>
         <div class="chips" id="faq-chips" role="group" aria-label="Saring pertanyaan per hewan">
           <button type="button" class="chip on" data-cat="semua" aria-pressed="true">Semua</button>
-          <button type="button" class="chip" data-cat="sapi" aria-pressed="false">Sapi</button>
-          <button type="button" class="chip" data-cat="kambing" aria-pressed="false">Kambing &amp; Domba</button>
-          <button type="button" class="chip" data-cat="ayam" aria-pressed="false">Ayam</button>
-          <button type="button" class="chip" data-cat="umum" aria-pressed="false">Umum</button>
+          <button type="button" class="chip" data-cat="sapi" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7C4 7 3 5 3 3M17 7c3 0 4-2 4-4"/><path d="M7 6h10v7H7z"/><rect x="8" y="13" width="8" height="7" rx="2"/></svg>Sapi</button>
+          <button type="button" class="chip" data-cat="kambing" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6C8 4 6 3 4 4M15 6c1-2 3-3 5-2"/><path d="M9 6h6l-1 9h-4z"/><path d="M11 15l1 5 1-5"/></svg>Kambing &amp; Domba</button>
+          <button type="button" class="chip" data-cat="ayam" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8c0-2 1.5-3 2.5-2 .2-2 2.5-2 2.8 0 1-1 2.4-.2 2.4 1.7"/><circle cx="11" cy="13" r="6"/><path d="M17 11l4 2-4 2"/></svg>Ayam</button>
+          <button type="button" class="chip" data-cat="umum" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l8-6 8 6"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg>Umum</button>
+        </div>
+        <div id="tools">
+          <p class="sl">Alat cepat</p>
+          <div class="tools" role="group" aria-label="Alat cepat">
+            <button type="button" class="tool" data-tool="lahiran" aria-expanded="false">Perkiraan lahiran<small>dari tanggal kawin</small></button>
+            <button type="button" class="tool" data-tool="jadwal" aria-expanded="false">Jadwal vaksin &amp; cacing<small>panduan umum</small></button>
+            <button type="button" class="tool" data-tool="berat" aria-expanded="false">Estimasi berat<small>dari lingkar dada</small></button>
+          </div>
+          <div id="tool-panel" class="form-panel" hidden></div>
         </div>
         <p class="sl" id="faq-count" aria-live="polite"></p>
-        <div id="faq-list"></div>
+        <div id="faq-list" class="faq-cards"></div>
         <div class="state-empty" id="faq-none" hidden>
           <p>Tidak ada pertanyaan yang cocok.</p>
           <button type="button" class="btn-secondary" id="faq-clear">Hapus pencarian</button>
         </div>
-        <button type="button" class="ask" id="faq-ask"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Tanya AI</button>
       </main>
 
       <!-- ── FORUM ────────────────────────────────────────────────────── -->
       <main id="view-forum" class="view" hidden>
-        <div class="hd"><div><b>Forum</b><span>Tanya dan berbagi sesama peternak</span></div><button type="button" class="btn-primary" id="forum-new"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Tulis</button></div>
+        <div class="hd"><div><b>Forum</b><span>Tanya dan berbagi sesama peternak</span></div><button type="button" class="info" data-info aria-expanded="false" aria-label="Tentang jawaban di aplikasi ini"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg></button><button type="button" class="btn-primary" id="forum-new"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Tulis</button></div>
+        <p class="safety" role="note" hidden>Informasi umum, bukan pengganti dokter hewan. Untuk penyakit menular, hewan darurat, atau obat keras, hubungi dokter hewan atau dinas peternakan.</p>
 
         <form id="post-form" class="form-panel" hidden>
           <div class="form-top">
@@ -145,6 +155,14 @@
           <p class="msg-err" id="post-err" role="alert" hidden></p>
         </form>
 
+        <div class="chips" id="forum-chips" role="group" aria-label="Saring pertanyaan forum per hewan">
+          <button type="button" class="chip on" data-cat="semua" aria-pressed="true">Semua</button>
+          <button type="button" class="chip" data-cat="sapi" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7C4 7 3 5 3 3M17 7c3 0 4-2 4-4"/><path d="M7 6h10v7H7z"/><rect x="8" y="13" width="8" height="7" rx="2"/></svg>Sapi</button>
+          <button type="button" class="chip" data-cat="kambing" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6C8 4 6 3 4 4M15 6c1-2 3-3 5-2"/><path d="M9 6h6l-1 9h-4z"/><path d="M11 15l1 5 1-5"/></svg>Kambing &amp; Domba</button>
+          <button type="button" class="chip" data-cat="ayam" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8c0-2 1.5-3 2.5-2 .2-2 2.5-2 2.8 0 1-1 2.4-.2 2.4 1.7"/><circle cx="11" cy="13" r="6"/><path d="M17 11l4 2-4 2"/></svg>Ayam</button>
+          <button type="button" class="chip" data-cat="umum" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l8-6 8 6"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg>Umum</button>
+        </div>
+
         <p class="sl" id="forum-name">Pertanyaan terbaru</p>
 
         <ul class="list" id="forum-loading" aria-hidden="true">
@@ -162,6 +180,11 @@
           <button type="button" class="btn-primary" id="forum-empty-new">Tulis pertanyaan</button>
         </div>
 
+        <div class="state-empty" id="forum-empty-cat" hidden>
+          <p><b id="forum-empty-cat-title">Belum ada pertanyaan</b></p>
+          <button type="button" class="btn-primary" id="forum-empty-cat-new">Tulis pertanyaan</button>
+        </div>
+
         <div class="state-error" id="forum-error" hidden>
           <p><b>Pertanyaan gagal dimuat</b></p>
           <p>Forum sedang tidak bisa dihubungi. FAQ tetap bisa dibuka.</p>
@@ -171,8 +194,9 @@
 
       <!-- ── TANYA AI ─────────────────────────────────────────────────── -->
       <main id="view-ai" class="view" hidden>
-        <div class="hd"><div><b>Tanya AI</b><span>Tanya soal ternak, dijawab singkat</span></div></div>
-        <p class="warn" role="note">Jawaban AI bersifat umum dan bisa keliru.</p>
+        <div class="hd"><div><b>Tanya AI</b><span>Tanya soal ternak, dijawab singkat</span></div><button type="button" class="info" data-info aria-expanded="false" aria-label="Tentang jawaban di aplikasi ini"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg></button></div>
+        <p class="safety" role="note" hidden>Informasi umum, bukan pengganti dokter hewan. Untuk penyakit menular, hewan darurat, atau obat keras, hubungi dokter hewan atau dinas peternakan.</p>
+        <p class="note" role="note">Jawaban AI bersifat umum dan bisa keliru.</p>
         <div class="chat" id="ai-log" aria-live="polite"></div>
         <div class="state-error" id="ai-error" hidden>
           <p id="ai-error-text">Jawaban gagal dimuat.</p>
@@ -188,11 +212,10 @@
       </main>
 
       <div class="foot">
-        <p>Informasi umum, bukan pengganti dokter hewan.</p>
         <div class="tabs" role="tablist" aria-label="Tab aplikasi">
-          <button type="button" class="tab on" data-tab="faq" role="tab" aria-selected="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17v.1"/></svg>FAQ</button>
-          <button type="button" class="tab" data-tab="forum" role="tab" aria-selected="false"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Forum</button>
-          <button type="button" class="tab" data-tab="ai" role="tab" aria-selected="false"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>Tanya AI</button>
+          <button type="button" class="tab on" data-tab="faq" role="tab" aria-selected="true"><span class="pill"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17v.1"/></svg></span>FAQ</button>
+          <button type="button" class="tab" data-tab="forum" role="tab" aria-selected="false"><span class="pill"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></span>Forum</button>
+          <button type="button" class="tab ai" data-tab="ai" role="tab" aria-selected="false"><span class="pill"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg></span>Tanya AI</button>
         </div>
       </div>
     </div>
@@ -269,100 +292,326 @@
       { cat: 'sapi', q: 'Apa tanda sapi birahi?', a: 'Gelisah, sering menaiki sapi lain, vulva bengkak dan berlendir bening, serta diam bila ditunggangi. Birahi datang tiap 18 sampai 24 hari; bila lebih lama, periksa ke mantri.' },
       { cat: 'ayam', q: 'Kapan ayam divaksin ND?', a: 'Umumnya umur 3 sampai 4 hari (tetes mata atau air minum), diulang umur 3 sampai 4 minggu, lalu tiap 3 sampai 4 bulan. Ikuti jadwal petugas atau dinas peternakan setempat.' },
       { cat: 'ayam', q: 'Berapa hari telur ayam menetas?', a: 'Sekitar 21 hari. Mesin tetas dijaga sekitar 37,5 derajat Celsius dengan kelembapan 55 sampai 60 persen, dan dibalik 3 sampai 4 kali sehari. Telur itik lebih lama, sekitar 28 hari.' },
-      { cat: 'kambing', q: 'Kambing kembung, apa yang dilakukan?', a: 'Hentikan pakan beragi dan rumput basah, ajak berjalan pelan, beri air bersih. Kembung yang cepat membesar, sesak, atau hewan tidak mau berdiri adalah darurat: hubungi dokter hewan segera.' },
-      { cat: 'sapi', q: 'Apa gejala PMK pada sapi?', a: 'Demam, lepuh di mulut dan kuku, air liur berlebih, pincang, tidak mau makan, dan susu turun. PMK menular: pisahkan hewan, jangan dipindahkan, lalu segera lapor ke dinas peternakan atau dokter hewan.' },
-      { cat: 'kambing', q: 'Bagaimana mencegah cacingan?', a: 'Beri pakan dan air dari tempat bersih, hindari lahan lembap terus-menerus, jaga kandang kering, dan beri obat cacing sesuai jadwal dari petugas. Jangan menakar obat keras sendiri.' },
+      { cat: 'kambing', warn: true, q: 'Kambing kembung, apa yang dilakukan?', a: 'Hentikan pakan beragi dan rumput basah, ajak berjalan pelan, beri air bersih. Kembung yang cepat membesar, sesak, atau hewan tidak mau berdiri adalah darurat: hubungi dokter hewan segera.' },
+      { cat: 'sapi', warn: true, q: 'Apa gejala PMK pada sapi?', a: 'Demam, lepuh di mulut dan kuku, air liur berlebih, pincang, tidak mau makan, dan susu turun. PMK menular: pisahkan hewan, jangan dipindahkan, lalu segera lapor ke dinas peternakan atau dokter hewan.' },
+      { cat: 'kambing', warn: true, q: 'Bagaimana mencegah cacingan?', a: 'Beri pakan dan air dari tempat bersih, hindari lahan lembap terus-menerus, jaga kandang kering, dan beri obat cacing sesuai jadwal dari petugas. Jangan menakar obat keras sendiri.' },
       { cat: 'umum', q: 'Berapa banyak air yang dibutuhkan ternak?', a: 'Sapi sekitar 30 sampai 50 liter per hari, kambing 4 sampai 8 liter, ayam sekitar 0,25 liter. Kebutuhan naik saat cuaca panas, bunting, atau menyusui. Air harus bersih dan selalu tersedia.' },
       { cat: 'umum', q: 'Bagaimana menyimpan pakan hijauan?', a: 'Keringkan dulu, simpan di tempat kering beralas kayu dan ada anginnya, jangan ditumpuk tebal. Hijauan basah yang bertumpuk cepat berjamur dan berbau asam.' },
-      { cat: 'ayam', q: 'Ayam tidak mau makan, apa yang dicek?', a: 'Cek suhu dan kelembapan kandang, air minum, dan apakah ada ayam lain yang lemas atau mati mendadak. Pisahkan yang sakit, lalu konsultasi ke mantri atau dinas peternakan bila ada kematian mendadak.' },
+      { cat: 'ayam', warn: true, q: 'Ayam tidak mau makan, apa yang dicek?', a: 'Cek suhu dan kelembapan kandang, air minum, dan apakah ada ayam lain yang lemas atau mati mendadak. Pisahkan yang sakit, lalu konsultasi ke mantri atau dinas peternakan bila ada kematian mendadak.' },
       { cat: 'sapi', q: 'Berapa porsi hijauan untuk sapi?', a: 'Kira-kira 10 persen dari bobot badan per hari, misalnya sapi 250 kg sekitar 25 kg hijauan segar, ditambah konsentrat bila perlu. Bagi menjadi dua kali pemberian.' },
-      { cat: 'kambing', q: 'Kenapa anak kambing diare?', a: 'Sering karena susu berubah, pakan baru, atau infeksi. Jaga air bersih dan jangan biarkan lemas. Diare pada anak yang masih menyusu dan terlihat lemas perlu diperiksa dokter hewan.' },
+      { cat: 'kambing', warn: true, q: 'Kenapa anak kambing diare?', a: 'Sering karena susu berubah, pakan baru, atau infeksi. Jaga air bersih dan jangan biarkan lemas. Diare pada anak yang masih menyusu dan terlihat lemas perlu diperiksa dokter hewan.' },
       { cat: 'umum', q: 'Bagaimana menjaga kandang tetap kering?', a: 'Beri alas sekam atau jerami kering dan ganti rutin, buat saluran air di luar kandang, dan jangan terlalu padat. Kandang lembap memicu penyakit kuku dan pernapasan.' },
-      { cat: 'umum', q: 'Kapan harus menghubungi dokter hewan?', a: 'Bila hewan tidak mau makan lebih dari sehari, sulit bernapas, kejang, tidak bisa berdiri, melahirkan bermasalah, atau ada kematian mendadak. Untuk penyakit menular seperti PMK dan flu burung, laporkan ke dinas peternakan.' }
+      { cat: 'umum', warn: true, q: 'Kapan harus menghubungi dokter hewan?', a: 'Bila hewan tidak mau makan lebih dari sehari, sulit bernapas, kejang, tidak bisa berdiri, melahirkan bermasalah, atau ada kematian mendadak. Untuk penyakit menular seperti PMK dan flu burung, laporkan ke dinas peternakan.' }
     ];
 
     var faqSearch = document.getElementById('faq-search');
     var faqList = document.getElementById('faq-list');
     var faqCount = document.getElementById('faq-count');
     var faqNone = document.getElementById('faq-none');
+    var faqTools = document.getElementById('tools');
     var faqCat = 'semua';
     var faqOpen = {};
+    var NOTE = 'Informasi umum, bukan pengganti dokter hewan.';
+    var ALERT = 'Penyakit menular atau darurat: hubungi dokter hewan atau dinas peternakan.';
 
-    function faqRow(f) {
+    function faqCard(f, i) {
       var key = f.cat + ':' + f.q;
       var open = !!faqOpen[key];
-      return '<li class="list-row" role="button" tabindex="0" aria-expanded="' + (open ? 'true' : 'false') + '" data-key="' + esc(key) + '">' +
-        '<span class="ic ' + f.cat + '">' + ICONS[f.cat] + '</span>' +
-        '<div class="q">' + esc(f.q) + '<div class="a' + (open ? '' : ' clip') + '">' + esc(f.a) + '</div></div>' +
-        (open ? CHEV.up : CHEV.down) + '</li>';
+      return '<div class="card faq-card' + (open ? ' open' : '') + '" data-key="' + esc(key) + '" data-i="' + i + '">' +
+        '<button type="button" class="faq-top" aria-expanded="' + (open ? 'true' : 'false') + '">' +
+          '<span class="ic ' + f.cat + '">' + ICONS[f.cat] + '</span>' +
+          '<span class="q"><span class="qt">' + esc(f.q) + '</span>' +
+            '<span class="a' + (open ? '' : ' clip') + '">' + esc(f.a) + '</span>' +
+            '<span class="tag ' + f.cat + '">' + esc(ANIMAL[f.cat]) + '</span></span>' +
+          CHEV.down +
+        '</button>' +
+        '<div class="faq-more"><div class="faq-inner">' +
+          (f.warn ? '<p class="alert">' + ALERT + '</p>' : '<p class="note-thin">' + NOTE + '</p>') +
+          '<div class="acts">' +
+            '<button type="button" class="btn-primary" data-action="faq-ai" tabindex="' + (open ? '0' : '-1') + '">Tanya AI lebih lanjut</button>' +
+            '<button type="button" class="btn-secondary" data-action="faq-share" tabindex="' + (open ? '0' : '-1') + '">Bagikan</button>' +
+          '</div>' +
+          '<p class="msg" role="status" data-share-status hidden></p>' +
+        '</div></div></div>';
     }
 
     var FAQ_ORDER = ['sapi', 'kambing', 'ayam', 'umum'];
 
     function renderFaq() {
       var needle = faqSearch.value.trim().toLowerCase();
-      var shown = FAQ.filter(function (f) {
-        if (faqCat !== 'semua' && f.cat !== faqCat) return false;
-        if (!needle) return true;
-        return (f.q + ' ' + f.a).toLowerCase().indexOf(needle) >= 0;
+      var shown = [];
+      FAQ_ORDER.forEach(function (cat) {
+        FAQ.forEach(function (f, i) {
+          if (f.cat !== cat) return;
+          if (faqCat !== 'semua' && f.cat !== faqCat) return;
+          if (needle && (f.q + ' ' + f.a).toLowerCase().indexOf(needle) < 0) return;
+          shown.push({ f: f, i: i });
+        });
       });
       faqCount.textContent = shown.length + ' pertanyaan';
-      if (faqCat === 'semua') {
-        faqList.innerHTML = FAQ_ORDER.map(function (cat) {
-          var rows = shown.filter(function (f) { return f.cat === cat; });
-          if (!rows.length) return '';
-          return '<div class="faq-group"><p class="sl">' + esc(ANIMAL[cat]) + '</p>' +
-            '<ul class="list">' + rows.map(faqRow).join('') + '</ul></div>';
-        }).join('');
-      } else {
-        faqList.innerHTML = '<ul class="list">' + shown.map(faqRow).join('') + '</ul>';
-      }
+      faqList.innerHTML = shown.map(function (s) { return faqCard(s.f, s.i); }).join('');
       faqList.hidden = shown.length === 0;
       faqNone.hidden = shown.length !== 0;
+      // The tools stay out of the way while someone is searching.
+      faqTools.hidden = needle !== '';
     }
 
-    function toggleFaq(key) {
-      if (faqOpen[key]) delete faqOpen[key];
-      else faqOpen[key] = true;
-      renderFaq();
+    // Opening and closing changes classes in place (not a re-render), so the
+    // answer's extra part slides open.
+    function toggleFaq(card) {
+      var key = card.getAttribute('data-key');
+      var open = !faqOpen[key];
+      if (open) faqOpen[key] = true;
+      else delete faqOpen[key];
+      card.classList.toggle('open', open);
+      card.querySelector('.faq-top').setAttribute('aria-expanded', open ? 'true' : 'false');
+      card.querySelector('.a').classList.toggle('clip', !open);
+      card.querySelectorAll('[data-action]').forEach(function (b) { b.tabIndex = open ? 0 : -1; });
+    }
+
+    function shareStatus(card, message) {
+      var el = card.querySelector('[data-share-status]');
+      el.textContent = message;
+      el.hidden = false;
+    }
+
+    function copyFaq(card, text) {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        shareStatus(card, 'Gagal membagikan.');
+        return;
+      }
+      navigator.clipboard.writeText(text).then(function () {
+        shareStatus(card, 'Tersalin');
+      }, function () {
+        shareStatus(card, 'Gagal membagikan.');
+      });
+    }
+
+    function shareFaq(card, f) {
+      // Text only: the page URL inside the frame carries the viewer's token.
+      var text = f.q + '\n\n' + f.a + '\n\n— TernakKu, informasi umum, bukan pengganti dokter hewan.';
+      if (navigator.share) {
+        navigator.share({ title: 'TernakKu', text: text }).catch(function (err) {
+          if (err && err.name === 'AbortError') return;
+          copyFaq(card, text);
+        });
+        return;
+      }
+      copyFaq(card, text);
     }
 
     faqList.addEventListener('click', function (ev) {
-      var row = ev.target.closest('[data-key]');
-      if (row) toggleFaq(row.getAttribute('data-key'));
-    });
-    faqList.addEventListener('keydown', function (ev) {
-      if (ev.key !== 'Enter' && ev.key !== ' ') return;
-      var row = ev.target.closest('[data-key]');
-      if (!row) return;
-      ev.preventDefault();
-      toggleFaq(row.getAttribute('data-key'));
+      var card = ev.target.closest('[data-key]');
+      if (!card) return;
+      var btn = ev.target.closest('[data-action]');
+      if (btn) {
+        var f = FAQ[Number(card.getAttribute('data-i'))];
+        if (btn.getAttribute('data-action') === 'faq-ai') {
+          var input = document.getElementById('ai-input');
+          input.value = f.q;
+          goTab('ai');
+          input.focus();
+        } else {
+          shareFaq(card, f);
+        }
+        return;
+      }
+      if (ev.target.closest('.faq-top')) toggleFaq(card);
     });
 
+    function setChips(group, cat) {
+      group.querySelectorAll('.chip').forEach(function (c) {
+        var on = c.getAttribute('data-cat') === cat;
+        c.classList.toggle('on', on);
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+
+    var faqChips = document.getElementById('faq-chips');
     faqSearch.addEventListener('input', renderFaq);
     document.getElementById('faq-clear').addEventListener('click', function () {
       faqSearch.value = '';
       faqCat = 'semua';
-      document.querySelectorAll('#faq-chips .chip').forEach(function (c) {
-        var on = c.getAttribute('data-cat') === 'semua';
-        c.classList.toggle('on', on);
-        c.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
+      setChips(faqChips, faqCat);
       renderFaq();
       faqSearch.focus();
     });
-    document.getElementById('faq-chips').addEventListener('click', function (ev) {
+    faqChips.addEventListener('click', function (ev) {
       var chip = ev.target.closest('.chip');
       if (!chip) return;
       faqCat = chip.getAttribute('data-cat');
-      document.querySelectorAll('#faq-chips .chip').forEach(function (c) {
-        var on = c === chip;
-        c.classList.toggle('on', on);
-        c.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
+      setChips(faqChips, faqCat);
       renderFaq();
     });
-    document.getElementById('faq-ask').addEventListener('click', function () { goTab('ai'); });
+
+    // ── Header: greeting and the safety note behind ⓘ ──────────────────────
+    (function () {
+      var h = new Date().getHours();
+      var part = h >= 4 && h <= 10 ? 'pagi' : h >= 11 && h <= 14 ? 'siang' : h >= 15 && h <= 17 ? 'sore' : 'malam';
+      document.getElementById('greeting').textContent = 'Selamat ' + part + ', peternak';
+    })();
+    document.querySelectorAll('[data-info]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var note = b.closest('.view').querySelector('.safety');
+        note.hidden = !note.hidden;
+        b.setAttribute('aria-expanded', note.hidden ? 'false' : 'true');
+      });
+    });
+
+    // ── Alat cepat ─────────────────────────────────────────────────────────
+    // Gestation in days, the same figures the FAQ answers give.
+    var GESTATION = {
+      sapi: { label: 'Sapi', days: 280, min: 270, max: 290 },
+      kambing: { label: 'Kambing', days: 150, min: 145, max: 155 },
+      domba: { label: 'Domba', days: 148, min: 145, max: 152 }
+    };
+    // General timing only: never a drug name or a dose.
+    var SCHEDULE = {
+      sapi: [
+        'Vaksin: ikuti program vaksinasi dinas peternakan setempat.',
+        'Obat cacing: umumnya tiap 3 sampai 4 bulan. Ikuti takaran dari petugas.',
+        'Pedet: tanya petugas kapan obat cacing pertama diberikan.'
+      ],
+      kambing: [
+        'Vaksin: ikuti program vaksinasi dinas peternakan setempat.',
+        'Obat cacing: umumnya tiap 3 sampai 4 bulan, dan menjelang musim hujan. Ikuti takaran dari petugas.',
+        'Induk bunting: tanya petugas sebelum memberi obat cacing.'
+      ],
+      ayam: [
+        'Vaksin ND pertama: umur 3 sampai 4 hari (tetes mata atau air minum).',
+        'Vaksin ND ulangan: umur 3 sampai 4 minggu.',
+        'Setelah itu vaksin ND tiap 3 sampai 4 bulan.',
+        'Obat cacing: tanya petugas kapan perlu. Ikuti takaran dari petugas.'
+      ],
+      umum: [
+        'Catat tanggal setiap vaksin dan obat cacing.',
+        'Vaksin dan obat cacing hanya untuk hewan yang sehat; hewan sakit diperiksa dulu.',
+        'Tanya jadwal program vaksin gratis ke dinas peternakan setempat.'
+      ]
+    };
+    var TOOL_TITLE = { lahiran: 'Perkiraan lahiran', jadwal: 'Jadwal vaksin & cacing', berat: 'Estimasi berat' };
+    var toolPanel = document.getElementById('tool-panel');
+    var toolButtons = Array.prototype.slice.call(document.querySelectorAll('[data-tool]'));
+    var toolOpen = null;
+
+    function toolHtml(tool) {
+      var top = '<div class="form-top"><button type="button" class="ghost" data-tool-close>Tutup</button>' +
+        '<span class="form-title">' + esc(TOOL_TITLE[tool]) + '</span></div>';
+      if (tool === 'lahiran') {
+        return top +
+          '<label class="lbl" for="tl-animal">Hewan</label>' +
+          '<select id="tl-animal" class="field"><option value="sapi">Sapi</option><option value="kambing">Kambing</option><option value="domba">Domba</option></select>' +
+          '<label class="lbl" for="tl-date">Tanggal kawin</label>' +
+          '<input id="tl-date" class="field" type="date">' +
+          '<div class="acts"><button type="button" class="btn-primary" data-tool-run>Hitung</button></div>' +
+          '<p class="tool-out" aria-live="polite" data-tool-out></p>';
+      }
+      if (tool === 'jadwal') {
+        return top +
+          '<label class="lbl" for="tj-animal">Hewan</label>' +
+          '<select id="tj-animal" class="field"><option value="sapi">Sapi</option><option value="kambing">Kambing &amp; Domba</option><option value="ayam">Ayam</option><option value="umum">Umum</option></select>' +
+          '<ul class="list tool-list" aria-live="polite" data-tool-out></ul>' +
+          '<p class="note-thin">Ini jadwal umum. Ikuti jadwal dan takaran dari petugas atau dinas peternakan setempat.</p>';
+      }
+      return top +
+        '<label class="lbl" for="tb-animal">Hewan</label>' +
+        '<select id="tb-animal" class="field"><option value="sapi">Sapi</option><option value="kambing">Kambing &amp; Domba</option></select>' +
+        '<label class="lbl" for="tb-ld">Lingkar dada (cm)</label>' +
+        '<input id="tb-ld" class="field" type="number" inputmode="numeric" min="40" max="250" placeholder="mis. 150">' +
+        '<div data-tb-pb hidden><label class="lbl" for="tb-pb">Panjang badan (cm)</label>' +
+        '<input id="tb-pb" class="field" type="number" inputmode="numeric" min="20" max="200" placeholder="mis. 60"></div>' +
+        '<div class="acts"><button type="button" class="btn-primary" data-tool-run>Hitung</button></div>' +
+        '<p class="tool-out" aria-live="polite" data-tool-out></p>';
+    }
+
+    function fmtDate(d, withYear) {
+      var o = { day: 'numeric', month: 'long' };
+      if (withYear) o.year = 'numeric';
+      return d.toLocaleDateString('id-ID', o);
+    }
+    function addDays(d, n) {
+      var r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      r.setDate(r.getDate() + n);
+      return r;
+    }
+
+    function runLahiran(out) {
+      var g = GESTATION[document.getElementById('tl-animal').value];
+      var v = document.getElementById('tl-date').value;
+      if (!v) { out.textContent = 'Isi tanggal kawin.'; return; }
+      var parts = v.split('-');
+      var mated = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      var today = new Date();
+      today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      if (isNaN(mated.getTime()) || mated > today || mated < addDays(today, -366)) {
+        out.textContent = 'Periksa tanggal kawin.';
+        return;
+      }
+      out.textContent = g.label + ' lahir sekitar ' + fmtDate(addDays(mated, g.days), true) +
+        ' (antara ' + fmtDate(addDays(mated, g.min), false) + ' dan ' + fmtDate(addDays(mated, g.max), false) + ').';
+    }
+
+    function runBerat(out) {
+      var animal = document.getElementById('tb-animal').value;
+      var ld = Number(document.getElementById('tb-ld').value);
+      if (!ld || ld < 40 || ld > 250) { out.textContent = 'Isi lingkar dada antara 40 dan 250 cm.'; return; }
+      var kg;
+      if (animal === 'sapi') {
+        kg = Math.pow(ld + 22, 2) / 100; // Schoorl
+      } else {
+        var pb = Number(document.getElementById('tb-pb').value);
+        if (!pb || pb < 20 || pb > 200) { out.textContent = 'Isi panjang badan antara 20 dan 200 cm.'; return; }
+        kg = ld * ld * pb / 10840; // Lambourne
+      }
+      out.textContent = 'Sekitar ' + Math.round(kg) + ' kg. Perkiraan, bisa meleset 10–20 persen; timbangan lebih tepat.';
+    }
+
+    function renderJadwal() {
+      var out = toolPanel.querySelector('[data-tool-out]');
+      out.innerHTML = SCHEDULE[document.getElementById('tj-animal').value].map(function (line) {
+        return '<li class="list-row">' + esc(line) + '</li>';
+      }).join('');
+    }
+
+    function openTool(tool) {
+      toolOpen = toolOpen === tool ? null : tool;
+      toolButtons.forEach(function (b) {
+        var on = b.getAttribute('data-tool') === toolOpen;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-expanded', on ? 'true' : 'false');
+      });
+      if (!toolOpen) { toolPanel.hidden = true; toolPanel.innerHTML = ''; return; }
+      toolPanel.innerHTML = toolHtml(toolOpen);
+      toolPanel.hidden = false;
+      if (toolOpen === 'jadwal') renderJadwal();
+      var first = toolPanel.querySelector('select');
+      if (first) first.focus();
+    }
+
+    toolButtons.forEach(function (b) {
+      b.addEventListener('click', function () { openTool(b.getAttribute('data-tool')); });
+    });
+    toolPanel.addEventListener('click', function (ev) {
+      if (ev.target.closest('[data-tool-close]')) {
+        var was = toolOpen;
+        openTool(toolOpen);
+        var btn = toolButtons.filter(function (b) { return b.getAttribute('data-tool') === was; })[0];
+        if (btn) btn.focus();
+        return;
+      }
+      if (ev.target.closest('[data-tool-run]')) {
+        var out = toolPanel.querySelector('[data-tool-out]');
+        if (toolOpen === 'lahiran') runLahiran(out);
+        else if (toolOpen === 'berat') runBerat(out);
+      }
+    });
+    toolPanel.addEventListener('change', function (ev) {
+      if (ev.target.id === 'tj-animal') renderJadwal();
+      if (ev.target.id === 'tb-animal') {
+        toolPanel.querySelector('[data-tb-pb]').hidden = ev.target.value === 'sapi';
+        toolPanel.querySelector('[data-tool-out]').textContent = '';
+      }
+    });
 
     renderFaq();
 
@@ -377,6 +626,10 @@
     var postForm = document.getElementById('post-form');
     var postErr = document.getElementById('post-err');
     var forumNew = document.getElementById('forum-new');
+    var forumEmptyCat = document.getElementById('forum-empty-cat');
+    var forumChips = document.getElementById('forum-chips');
+    var forumCat = 'semua';
+    var postsReady = false;
 
     if (DEMO) {
       forumName.innerHTML = 'Pertanyaan terbaru · <span data-usernode-demo-note>Staging demo</span>';
@@ -400,13 +653,30 @@
       return n === 0 ? 'belum ada balasan' : n + ' balasan';
     }
 
-    function renderPosts() {
+    function shownPosts() {
+      return posts.filter(function (p) { return forumCat === 'semua' || p.category === forumCat; });
+    }
+
+    // Which of list / empty / empty-for-this-animal shows, without touching
+    // the rows (so a half-typed reply survives).
+    function syncForumStates() {
+      var shown = shownPosts().length;
+      var formOpen = !postForm.hidden;
       forumLoading.hidden = true;
       forumError.hidden = true;
-      forumEmpty.hidden = posts.length !== 0;
-      forumList.hidden = posts.length === 0;
-      forumNew.hidden = posts.length === 0;
-      forumList.innerHTML = posts.map(function (p) {
+      forumEmpty.hidden = posts.length !== 0 || formOpen;
+      forumEmptyCat.hidden = posts.length === 0 || shown !== 0 || formOpen;
+      forumList.hidden = shown === 0;
+      forumNew.hidden = posts.length === 0 || formOpen;
+      if (forumCat !== 'semua') {
+        document.getElementById('forum-empty-cat-title').textContent = 'Belum ada pertanyaan soal ' + ANIMAL[forumCat];
+      }
+    }
+
+    function renderPosts() {
+      postsReady = true;
+      syncForumStates();
+      forumList.innerHTML = shownPosts().map(function (p) {
         var open = !!openPosts[p.id];
         var mine = p.mine;
         var replies = p.replies.map(function (r) {
@@ -440,9 +710,11 @@
 
     async function loadPosts() {
       forumLoaded = true;
+      postsReady = false;
       forumLoading.hidden = false;
       forumList.hidden = true;
       forumEmpty.hidden = true;
+      forumEmptyCat.hidden = true;
       forumError.hidden = true;
       try {
         var res = await api('/api/posts' + (DEMO ? '?demo=1' : ''));
@@ -461,16 +733,28 @@
       postForm.hidden = false;
       forumNew.hidden = true;
       forumEmpty.hidden = true;
+      forumEmptyCat.hidden = true;
       document.getElementById('post-title').focus();
     }
     function closeForm() {
       postForm.hidden = true;
-      forumNew.hidden = posts.length === 0;
       postErr.hidden = true;
-      forumEmpty.hidden = posts.length !== 0;
+      if (postsReady) syncForumStates();
+      else forumNew.hidden = posts.length === 0;
     }
     forumNew.addEventListener('click', openForm);
     document.getElementById('forum-empty-new').addEventListener('click', openForm);
+    document.getElementById('forum-empty-cat-new').addEventListener('click', function () {
+      document.getElementById('post-category').value = forumCat;
+      openForm();
+    });
+    forumChips.addEventListener('click', function (ev) {
+      var chip = ev.target.closest('.chip');
+      if (!chip) return;
+      forumCat = chip.getAttribute('data-cat');
+      setChips(forumChips, forumCat);
+      if (postsReady) renderPosts();
+    });
     document.getElementById('post-cancel').addEventListener('click', closeForm);
 
     function setFormError(message) {
@@ -628,6 +912,7 @@
     var aiError = document.getElementById('ai-error');
     var aiErrorText = document.getElementById('ai-error-text');
     var aiMsgs = [];
+    var SUGGEST = ['Sapi tidak mau makan', 'Ayam mencret', 'Kambing kembung', 'Kandang bau'];
     var aiBusy = false;
 
     if (DEMO) {
@@ -643,6 +928,12 @@
       }).join('');
       if (aiMsgs.length === 0) {
         html = '<p class="chat-hint">Tulis pertanyaan soal ternakmu di bawah. Untuk hewan yang sakit parah, hubungi dokter hewan.</p>';
+        if (!aiBusy) {
+          html += '<div class="suggest"><p class="lbl">Coba tanyakan</p><div class="chips sug">' +
+            SUGGEST.map(function (q) {
+              return '<button type="button" class="chip" data-suggest="' + esc(q) + '">' + esc(q) + '</button>';
+            }).join('') + '</div></div>';
+        }
       }
       if (aiBusy) {
         html += '<div class="bubble ai sk-bubble"><div class="skeleton sk-line" style="width:90%"></div><div class="skeleton sk-line" style="width:75%"></div><div class="skeleton sk-line" style="width:45%"></div></div>';
@@ -722,6 +1013,12 @@
     }
 
     aiSend.addEventListener('click', sendAI);
+    aiLog.addEventListener('click', function (ev) {
+      var chip = ev.target.closest('[data-suggest]');
+      if (!chip || aiBusy) return;
+      aiInput.value = chip.getAttribute('data-suggest');
+      sendAI();
+    });
     aiInput.addEventListener('keydown', function (ev) {
       if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
         ev.preventDefault();

@@ -18,6 +18,18 @@
       "expectText": "Berapa lama sapi bunting?"
     },
     {
+      "id": "faq-tools",
+      "name": "FAQ quick tools and cards",
+      "path": "/#faq",
+      "expectSelector": "#tools [data-tool=\"lahiran\"]",
+      "expectText": "Alat cepat",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**"
+      ]
+    },
+    {
       "id": "forum-demo",
       "name": "Forum demo",
       "path": "/?demo=1#forum",
@@ -26,6 +38,12 @@
       "impact": [
         "public/**"
       ]
+    },
+    {
+      "id": "forum-filter",
+      "name": "Forum animal filter",
+      "path": "/?demo=1#forum",
+      "expectSelector": "#forum-chips [data-cat=\"sapi\"]"
     },
     {
       "name": "AI warning",

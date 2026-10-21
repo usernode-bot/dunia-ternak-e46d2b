@@ -29,36 +29,40 @@
  */
 @layer base {
   :root {
-    --ground: 250 248 242;    /* the page */
+    --ground: 249 246 238;    /* the page: warm cream */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 241 238 228;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 228 224 212;      /* borders, dividers, skeletons */
-    --accent: 47 107 62;     /* the one accent */
+    --raised: 238 234 222;    /* hovers, badges, the search field */
+    --fg: 27 31 26;           /* text: green-black */
+    --muted: 84 88 80;        /* secondary text */
+    --line: 225 221 208;      /* borders, dividers, skeletons */
+    --accent: 58 99 70;       /* the one accent: sage */
     --on-accent: 255 255 255; /* text on the accent */
+    --accent-soft: 222 234 222; /* active chip and tab pill, under accent text */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 47 107 62;       /* the keyboard focus ring */
-    --straw: 138 98 10; /* from the spec's screens */
-    --straw-bg: 250 236 190; /* from the spec's screens */
-    --earth: 110 72 46; /* from the spec's screens */
-    --earth-bg: 236 222 210; /* from the spec's screens */
+    --warn-bg: 248 234 231;   /* the firmer disease/medicine note */
+    --focus: 58 99 70;        /* the keyboard focus ring */
+    --straw: 120 96 48;       /* goats and sheep: soft brownish cream */
+    --straw-bg: 240 232 212;
+    --earth: 110 72 46;
+    --earth-bg: 236 222 210;
   }
   .dark {
-    --ground: 22 24 19;       /* the page */
-    --surface: 32 35 28;      /* lists, cards, fields */
-    --raised: 44 48 39;       /* hovers, badges */
-    --fg: 240 238 230;        /* text */
-    --muted: 176 170 158;     /* secondary text */
-    --line: 62 66 55;         /* borders, dividers, skeletons */
-    --accent: 134 196 140;    /* the one accent */
+    --ground: 16 21 17;       /* the page: green-black */
+    --surface: 25 31 26;      /* lists, cards, fields */
+    --raised: 37 44 38;       /* hovers, badges, the search field */
+    --fg: 236 238 228;        /* text */
+    --muted: 170 176 164;     /* secondary text */
+    --line: 56 64 56;         /* borders, dividers, skeletons */
+    --accent: 150 190 152;    /* the one accent: sage */
     --on-accent: 16 40 22;    /* text on the accent */
+    --accent-soft: 40 62 44;  /* active chip and tab pill, under accent text */
     --danger: 248 132 132;
     --on-danger: 60 10 10;
-    --focus: 168 220 172;     /* the keyboard focus ring */
-    --straw: 228 188 92;
-    --straw-bg: 70 55 22;
+    --warn-bg: 64 30 30;      /* the firmer disease/medicine note */
+    --focus: 168 210 170;     /* the keyboard focus ring */
+    --straw: 214 190 140;
+    --straw-bg: 58 50 34;
     --earth: 214 170 136;
     --earth-bg: 64 45 31;
   }
