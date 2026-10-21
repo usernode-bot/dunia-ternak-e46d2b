@@ -97,8 +97,13 @@ tables you've marked private), etc.
 
 Panduan ternak untuk peternak kecil
 
-_(add a sentence or two more of product context here so Claude Code has a
-shared understanding of what this app is for)_
+TernakKu is a livestock guide for small farmers in Indonesia, in Indonesian.
+One screen with three tabs: a searched and filtered FAQ of 15 common
+questions, a shared forum where farmers post questions and replies under a
+nickname typed each time, and a short AI chat (Tanya AI). Answers stay
+general and point to a vet or the dinas peternakan for serious, emergency or
+contagious cases. Farmers often read on a weak-signal phone: keep the page
+light, the text large and the buttons big.
 
 ## Your people's data
 
@@ -114,14 +119,19 @@ about, add it to `SKIP`. Keep the file and its mount in `server.js`.
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: soft field green; neutrals: cream and warm greys;
+  animal markers: straw yellow (goats and sheep, `straw` / `straw-bg`),
+  earth brown (cattle, `earth` / `earth-bg`), and green on the raised ground
+  for chickens and the barn for Umum. Light and dark values are the tokens
+  in `styles/tailwind-input.css`; the dark look keeps each hue.
+- **Signature element:** a round marker on every FAQ question and forum post
+  holding a line drawing of the animal's head (cow, goat, hen) or a small
+  barn for Umum.
+- **Type scale:** `text-title` (28/36), `text-heading` (20/28),
+  `text-body` (18/26), `text-small` (16/22). Body text is 18 px on purpose.
+- **Layout:** the header says TernakKu, the tab's content scrolls, and a
+  fixed footer ("Informasi umum, bukan pengganti dokter hewan.") sits above
+  a 64 px tab bar. Buttons and fields are at least 48 px tall.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -151,6 +161,15 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The 15 FAQ answers live in `public/index.html` as the `FAQ` array: they
+  are app content, not stored rows.
+- The forum is one shared board. Posts carry a nickname typed each time;
+  Homeroom's account (`user_id`) decides who may remove a post or reply.
+  `forum_reports` only records reports; nothing is hidden automatically.
+- `is_demo` rows are staging sample data: they are only returned when
+  `USERNODE_ENV=staging` and the page is opened with `?demo=1`.
+- The AI prompt is server-side (`AI_SYSTEM_PROMPT` in `server.js`) and must
+  keep telling the model to decline the platform's content-rule topics and
+  never to give doses of strong or prescription drugs.
+- Text written by people is trimmed and length-checked on the server
+  (title 120, body 2000, nickname 40 characters).

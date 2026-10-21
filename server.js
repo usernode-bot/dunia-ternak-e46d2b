@@ -165,6 +165,418 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── Forum data ──────────────────────────────────────────────────────────────
+// One shared forum: every signed-in farmer sees everybody's questions.
+// A guest may read (mode "public" tables), but writing needs an account.
+const CATEGORIES = new Set(['sapi', 'kambing', 'ayam', 'umum']);
+
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS forum_posts (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      nickname text NOT NULL,
+      category text NOT NULL,
+      title text NOT NULL,
+      body text NOT NULL,
+      is_demo boolean NOT NULL DEFAULT false,
+      demo_key text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS forum_posts_owner_demo
+      ON forum_posts (user_id, demo_key);
+    CREATE TABLE IF NOT EXISTS forum_replies (
+      id serial PRIMARY KEY,
+      post_id integer NOT NULL REFERENCES forum_posts(id) ON DELETE CASCADE,
+      user_id text NOT NULL,
+      nickname text NOT NULL,
+      body text NOT NULL,
+      is_demo boolean NOT NULL DEFAULT false,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS forum_replies_post ON forum_replies (post_id);
+    CREATE TABLE IF NOT EXISTS forum_reports (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      kind text NOT NULL,
+      target_id integer NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    COMMENT ON TABLE forum_reports IS 'staging:private';
+  `);
+}
+
+// Trimmed, length-checked text from a request body, or null when it is not
+// usable. A title, a body or a nickname that is too long is an error rather
+// than silently cut short.
+function textField(value, max, min) {
+  if (typeof value !== 'string') return null;
+  const text = value.trim();
+  if (text.length < (min || 1) || text.length > max) return null;
+  return text;
+}
+
+function iso(value) {
+  return value instanceof Date ? value.toISOString() : value;
+}
+
+// Staging seed: obviously fake farmers and questions, so the populated
+// forum can be seen. Fixed demo keys make it idempotent; none of it is
+// shown unless the staging preview is opened with ?demo=1.
+const DEMO_HOURS = (h) => new Date(Date.now() - Math.round(h * 3600_000));
+const DEMO_POSTS = [
+  {
+    key: 'p1', user: 'demo:pak-contoh', nick: 'Pak Contoh', cat: 'kambing', hours: 2,
+    title: 'Kambing saya tidak mau makan sejak kemarin',
+    body: 'Umur 1 tahun, perut agak besar sebelah kiri. Minum masih mau. Apa perlu panggil mantri?',
+    replies: [
+      { user: 'demo:bu-uji', nick: 'Bu Uji Coba', hours: 1, body: 'Kalau perut kiri kembung, cepat hubungi dokter hewan. Jangan diberi makan rumput basah dulu.' },
+      { user: 'demo:mas-sampel', nick: 'Mas Sampel', hours: 0.7, body: 'Setuju, kembung bisa cepat parah. Sambil menunggu, ajak kambing berjalan pelan.' },
+    ],
+  },
+  {
+    key: 'p2', user: 'demo:kang-demo', nick: 'Kang Demo', cat: 'ayam', hours: 26,
+    title: 'Ayam kampung mengantuk dan jengger pucat',
+    body: 'Tiga ekor dari 20 mulai lemas, nafsu makan turun. Apakah tanda cacingan atau penyakit lain?',
+    replies: [
+      { user: 'demo:bu-uji', nick: 'Bu Uji Coba', hours: 24, body: 'Pisahkan yang lemas dulu. Kalau ada kematian mendadak, laporkan ke dinas peternakan.' },
+      { user: 'demo:pak-contoh', nick: 'Pak Contoh', hours: 20, body: 'Saya pernah seperti ini, ternyata cacing. Lebih aman periksa kotoran ke mantri.' },
+      { user: 'demo:mas-sampel', nick: 'Mas Sampel', hours: 18, body: 'Cek juga kandangnya, kalau lembap ayam gampang sakit.' },
+    ],
+  },
+  {
+    key: 'p3', user: 'demo:ibu-fiktif', nick: 'Ibu Fiktif', cat: 'ayam', hours: 70,
+    title: 'Suhu mesin tetas berapa derajat?',
+    body: 'Mesin tetas sederhana dari kotak kayu. Berapa suhu dan kelembapan yang aman untuk telur ayam kampung?',
+    replies: [],
+  },
+  {
+    key: 'p4', user: 'demo:pak-contoh', nick: 'Pak Contoh', cat: 'sapi', hours: 30,
+    title: 'Sapi perah susunya turun setelah hujan',
+    body: 'Dua hari hujan terus, susu turun dari 9 liter jadi 6 liter. Pakan tetap sama. Apa penyebabnya?',
+    replies: [
+      { user: 'demo:kang-demo', nick: 'Kang Demo', hours: 22, body: 'Sapi perah sensitif ke perubahan cuaca. Pastikan kandang tidak bocor dan air minum bersih.' },
+    ],
+  },
+  {
+    key: 'p5', user: 'demo:bu-uji', nick: 'Bu Uji Coba', cat: 'sapi', hours: 5,
+    title: 'Berapa hijauan per hari untuk sapi 250 kg?',
+    body: 'Sapi bakalan 250 kg. Saya kasih rumput gajah dua kali sehari, kira-kira berapa banyak yang cukup?',
+    replies: [
+      { user: 'demo:mas-sampel', nick: 'Mas Sampel', hours: 4, body: 'Umumnya sekitar 10 persen dari bobot badan per hari, jadi sekitar 25 kg hijauan segar. Tambah mineral.' },
+    ],
+  },
+  {
+    key: 'p6', user: 'demo:mas-sampel', nick: 'Mas Sampel', cat: 'kambing', hours: 8,
+    title: 'Anak kambing umur 2 minggu diare',
+    body: 'Anak kambing masih menyusu, kotorannya cair sejak pagi. Apa yang pertama harus dilakukan?',
+    replies: [
+      { user: 'demo:ibu-fiktif', nick: 'Ibu Fiktif', hours: 6, body: 'Jaga jangan sampai dehidrasi, beri air bersih. Kalau lemas, segera panggil dokter hewan.' },
+      { user: 'demo:pak-contoh', nick: 'Pak Contoh', hours: 5, body: 'Pisahkan dari induk lain dulu supaya tidak menular.' },
+    ],
+  },
+  {
+    key: 'p7', user: 'demo:bu-uji', nick: 'Bu Uji Coba', cat: 'umum', hours: 50,
+    title: 'Cara menyimpan jerami kering dan katul',
+    body: 'Musim panen, saya mau simpan pakan untuk musim kemarau. Bagaimana supaya tidak berjamur?',
+    replies: [
+      { user: 'demo:kang-demo', nick: 'Kang Demo', hours: 45, body: 'Simpan di tempat kering yang ada anginnya, alas kayu supaya tidak lembap dari lantai.' },
+    ],
+  },
+  {
+    key: 'p8', user: 'demo:pak-contoh', nick: 'Pak Contoh', cat: 'umum', hours: 140,
+    title: 'Kandang bau, pakai sekam atau kapur?',
+    body: 'Kandang kambing di belakang rumah baunya kuat. Lebih baik pakai sekam atau tabur kapur tiap hari?',
+    replies: [
+      { user: 'demo:ibu-fiktif', nick: 'Ibu Fiktif', hours: 130, body: 'Sekam yang diganti rutin lebih aman. Kapur boleh sesekali, jangan sampai berdebu tebal.' },
+    ],
+  },
+];
+
+const OWN_DEMO_POST = {
+  category: 'sapi',
+  title: 'Sapi sudah 3 bulan setelah IB, bagaimana tahu bunting?',
+  body: 'Sapi IB awal bulan tiga bulan lalu. Belum ada tanda birahi lagi. Apa cukup dilihat atau perlu periksa ke mantri?',
+  reply: { user: 'demo:kang-demo', nick: 'Kang Demo', hours: 20, body: 'Biasanya dicek dengan palpasi oleh mantri sekitar 60 hari setelah IB. Kalau belum pernah, sebaiknya periksa.' },
+};
+
+async function seedDemoForum() {
+  for (const p of DEMO_POSTS) {
+    const when = DEMO_HOURS(p.hours);
+    const inserted = await pool.query(
+      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, demo_key, created_at)
+       VALUES ($1,$2,$3,$4,$5,true,$6,$7)
+       ON CONFLICT (user_id, demo_key) DO NOTHING
+       RETURNING id`,
+      [p.user, p.nick, p.cat, p.title, p.body, p.key, when]
+    );
+    let postId = inserted.rows[0] && inserted.rows[0].id;
+    if (!postId) {
+      const found = await pool.query(
+        'SELECT id FROM forum_posts WHERE user_id = $1 AND demo_key = $2',
+        [p.user, p.key]
+      );
+      postId = found.rows[0] && found.rows[0].id;
+    }
+    if (!postId) continue;
+    for (const r of p.replies) {
+      await pool.query(
+        `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo, created_at)
+         SELECT $1,$2,$3,$4,true,$5
+         WHERE NOT EXISTS (
+           SELECT 1 FROM forum_replies
+           WHERE post_id = $1 AND user_id = $2 AND is_demo AND body = $4
+         )`,
+        [postId, r.user, r.nick, r.body, DEMO_HOURS(r.hours)]
+      );
+    }
+  }
+}
+
+// The viewer's own demo question, stored so Hapus works on it. Only with
+// ?demo=1, and marked demo so no other route shows it.
+async function ensureOwnDemoPost(userId) {
+  const inserted = await pool.query(
+    `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, demo_key, created_at)
+     VALUES ($1,'Kamu',$2,$3,$4,true,'own',$5)
+     ON CONFLICT (user_id, demo_key) DO NOTHING
+     RETURNING id`,
+    [userId, OWN_DEMO_POST.category, OWN_DEMO_POST.title, OWN_DEMO_POST.body, DEMO_HOURS(24)]
+  );
+  const postId = inserted.rows[0] && inserted.rows[0].id;
+  if (!postId) return;
+  const r = OWN_DEMO_POST.reply;
+  await pool.query(
+    `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo, created_at)
+     SELECT $1,$2,$3,$4,true,$5
+     WHERE NOT EXISTS (SELECT 1 FROM forum_replies WHERE post_id = $1 AND user_id = $2)`,
+    [postId, r.user, r.nick, r.body, DEMO_HOURS(r.hours)]
+  );
+}
+
+app.get('/api/posts', async (req, res) => {
+  const userId = req.user ? req.user.id : null;
+  const demo = IS_STAGING && req.query.demo === '1' && !!userId;
+  try {
+    if (demo) await ensureOwnDemoPost(userId);
+    const posts = await pool.query(
+      `SELECT id, user_id, nickname, category, title, body, created_at,
+              (user_id = $1) AS mine
+       FROM forum_posts
+       WHERE (NOT is_demo OR $2::boolean)
+       ORDER BY created_at DESC, id DESC`,
+      [userId, demo]
+    );
+    const ids = posts.rows.map((p) => p.id);
+    let replies = [];
+    if (ids.length) {
+      replies = (
+        await pool.query(
+          `SELECT id, post_id, user_id, nickname, body, created_at, (user_id = $1) AS mine
+           FROM forum_replies
+           WHERE post_id = ANY($2::int[])
+           ORDER BY created_at ASC, id ASC`,
+          [userId, ids]
+        )
+      ).rows;
+    }
+    res.json({
+      posts: posts.rows.map((p) => ({
+        id: p.id,
+        nickname: p.nickname,
+        category: p.category,
+        title: p.title,
+        body: p.body,
+        created_at: iso(p.created_at),
+        mine: p.mine === true,
+        replies: replies
+          .filter((r) => r.post_id === p.id)
+          .map((r) => ({
+            id: r.id,
+            nickname: r.nickname,
+            body: r.body,
+            created_at: iso(r.created_at),
+            mine: r.mine === true,
+          })),
+      })),
+    });
+  } catch (err) {
+    console.error('GET /api/posts failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/posts', async (req, res) => {
+  const category = req.body && req.body.category;
+  const title = textField(req.body && req.body.title, 120);
+  const body = textField(req.body && req.body.body, 2000);
+  const nickname = textField(req.body && req.body.nickname, 40);
+  if (!CATEGORIES.has(category) || !title || !body || !nickname) {
+    return res.status(400).json({ error: 'invalid_post' });
+  }
+  try {
+    const result = await pool.query(
+      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo)
+       VALUES ($1,$2,$3,$4,$5,false)
+       RETURNING id, created_at`,
+      [req.user.id, nickname, category, title, body]
+    );
+    res.status(201).json({ id: result.rows[0].id, created_at: iso(result.rows[0].created_at) });
+  } catch (err) {
+    console.error('POST /api/posts failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/posts/:id/replies', async (req, res) => {
+  const id = Number(req.params.id);
+  const body = textField(req.body && req.body.body, 2000);
+  const nickname = textField(req.body && req.body.nickname, 40);
+  if (!Number.isInteger(id) || id <= 0 || !body || !nickname) {
+    return res.status(400).json({ error: 'invalid_reply' });
+  }
+  try {
+    const exists = await pool.query('SELECT 1 FROM forum_posts WHERE id = $1', [id]);
+    if (!exists.rowCount) return res.status(404).json({ error: 'not_found' });
+    const result = await pool.query(
+      `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo)
+       VALUES ($1,$2,$3,$4,false)
+       RETURNING id`,
+      [id, req.user.id, nickname, body]
+    );
+    res.status(201).json({ id: result.rows[0].id });
+  } catch (err) {
+    console.error('POST reply failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Removing a post removes its replies (ON DELETE CASCADE); removing a reply
+// just removes it. Only the person who wrote it may remove it.
+app.delete('/api/posts/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid_id' });
+  try {
+    const owned = await pool.query(
+      'SELECT 1 FROM forum_posts WHERE id = $1 AND user_id = $2',
+      [id, req.user.id]
+    );
+    if (!owned.rowCount) return res.status(403).json({ error: 'forbidden' });
+    await pool.query('DELETE FROM forum_posts WHERE id = $1', [id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE post failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.delete('/api/replies/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid_id' });
+  try {
+    const owned = await pool.query(
+      'SELECT 1 FROM forum_replies WHERE id = $1 AND user_id = $2',
+      [id, req.user.id]
+    );
+    if (!owned.rowCount) return res.status(403).json({ error: 'forbidden' });
+    await pool.query('DELETE FROM forum_replies WHERE id = $1', [id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE reply failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Reports are recorded for the moderators; nothing is hidden automatically.
+app.post('/api/reports', async (req, res) => {
+  const kind = req.body && req.body.kind;
+  const targetId = Number(req.body && req.body.target_id);
+  if ((kind !== 'post' && kind !== 'reply') || !Number.isInteger(targetId) || targetId <= 0) {
+    return res.status(400).json({ error: 'invalid_report' });
+  }
+  try {
+    await pool.query(
+      'INSERT INTO forum_reports (user_id, kind, target_id) VALUES ($1,$2,$3)',
+      [req.user.id, kind, targetId]
+    );
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error('POST /api/reports failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ── Tanya AI ───────────────────────────────────────────────────────────────
+// Claude through the platform's LLM proxy, billed to the signed-in person's
+// own AI budget. Staging gets no proxy credentials: the route says so and
+// the page shows its fallback.
+const LLM_PROXY_URL = (process.env.USERNODE_LLM_PROXY_URL || '').replace(/\/+$/, '');
+const LLM_PROXY_TOKEN = process.env.USERNODE_LLM_PROXY_TOKEN || '';
+
+const AI_SYSTEM_PROMPT = [
+  'Anda asisten untuk peternak kecil di Indonesia. Jawab dalam bahasa Indonesia yang sederhana,',
+  'singkat (sekitar 120 kata), dan praktis. Sebutkan langkah yang bisa dilakukan hari ini.',
+  '',
+  'Aturan wajib:',
+  '- Jujur soal ketidakpastian. Jika tidak yakin, katakan begitu dan sebutkan apa yang perlu dicek.',
+  '- Untuk hewan yang sakit parah, kasus darurat (sulit bernapas, tidak bisa berdiri, kejang,',
+  '  melahirkan bermasalah, kehilangan banyak darah) atau penyakit menular seperti PMK, flu burung',
+  '  dan antraks: selalu sarankan segera menghubungi dokter hewan atau dinas peternakan setempat.',
+  '  Jangan menyarankan penanganan sendiri sebagai gantinya.',
+  '- Jangan pernah memberi dosis obat keras atau obat resep. Dosis hanya ditentukan dokter hewan.',
+  '- Jangan membahas kekerasan, senjata, perjudian, seksualitas, narkoba, atau topik dewasa lain,',
+  '  dan tolak topik di luar peternakan. Untuk topik seperti itu, tolak dengan sopan dan singkat',
+  '  tanpa menjelaskannya, lalu tawarkan kembali membantu soal ternak.',
+  '- Hindari diagnosis pasti; sebut kemungkinan dan langkah yang aman.',
+  '- Ingatkan, bila perlu, bahwa ini informasi umum dan bukan pengganti dokter hewan.',
+].join('\n');
+
+app.post('/api/ai', async (req, res) => {
+  const incoming = req.body && req.body.messages;
+  if (!Array.isArray(incoming)) return res.status(400).json({ error: 'messages_required' });
+  const messages = incoming
+    .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .slice(-10)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }))
+    .filter((m) => m.content.trim().length > 0);
+  if (!messages.length) return res.status(400).json({ error: 'messages_required' });
+  if (!LLM_PROXY_URL || !LLM_PROXY_TOKEN) return res.status(503).json({ code: 'unavailable' });
+
+  try {
+    const upstream = await fetch(LLM_PROXY_URL + '/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'x-usernode-app-token': LLM_PROXY_TOKEN,
+        'x-usernode-user-token': req.headers['x-usernode-token'] || '',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-5-5',
+        max_tokens: 600,
+        system: AI_SYSTEM_PROMPT,
+        messages,
+      }),
+    });
+    const data = await upstream.json().catch(() => ({}));
+    if (!upstream.ok) {
+      if (data && data.code) return res.status(upstream.status).json({ code: data.code });
+      console.warn('AI proxy answered ' + upstream.status);
+      return res.status(502).json({ code: 'upstream_error' });
+    }
+    const text = (Array.isArray(data.content) ? data.content : [])
+      .filter((b) => b && b.type === 'text' && typeof b.text === 'string')
+      .map((b) => b.text)
+      .join('\n')
+      .trim();
+    if (!text) return res.status(502).json({ code: 'empty_answer' });
+    res.json({ text });
+  } catch (err) {
+    console.warn('AI call failed: ' + err.message);
+    res.status(502).json({ code: 'upstream_error' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -203,10 +615,32 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server = null;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await ensureSchema();
+  if (IS_STAGING) {
+    try {
+      await seedDemoForum();
+    } catch (err) {
+      console.warn('staging demo seed failed: ' + err.message);
+    }
+  }
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Stop accepting connections, give in-flight requests about 3 seconds, then
+// close the pool and exit.
+function shutdown(signal) {
+  console.log(`${signal} received, shutting down`);
+  const done = () => pool.end().finally(() => process.exit(0));
+  if (!server) return done();
+  server.close(done);
+  setTimeout(done, 3000).unref();
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 start().catch(err => { console.error(err); process.exit(1); });

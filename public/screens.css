@@ -137,3 +137,101 @@
 .field {display:block;width:100%;min-height:48px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));padding:12px;font-size:16px;color:rgb(var(--muted))}
 
 .lbl {font-size:15px;font-weight:600;margin:14px 0 6px}
+
+/* ── Behaviour the drawn screens need ─────────────────────────────────────
+   The drawn frame is the app itself now: one centred column, a footer and
+   tab bar pinned to the bottom of the phone, and the filter row scrolling. */
+.app {
+  width: 100%;
+  max-width: 42rem;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding-bottom: calc(156px + env(safe-area-inset-bottom, 0px));
+}
+
+.chips {overflow-x: auto; scrollbar-width: none}
+.chips::-webkit-scrollbar {display: none}
+
+.foot {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 42rem;
+  bottom: 0;
+  z-index: 20;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.chip, .tab, .ask {cursor: pointer; font: inherit}
+
+.chip:focus-visible, .tab:focus-visible, .ask:focus-visible,
+.list-row[role="button"]:focus-visible, .t[role="button"]:focus-visible {
+  outline: 2px solid rgb(var(--focus));
+  outline-offset: 2px;
+}
+
+.ask {border: 0; width: calc(100% - 32px)}
+.tab {background: none; border: 0}
+
+.sw .field {padding-left: 44px}
+.field {color: rgb(var(--fg))}
+.field::placeholder {color: rgb(var(--muted))}
+.field:focus {outline: 2px solid rgb(var(--focus)); outline-offset: 1px}
+select.field {appearance: none; background-image: none}
+
+.ta {min-height: 88px; resize: vertical; font-family: inherit; line-height: 26px}
+
+/* Umum: the fourth animal marker, a barn on the raised ground. */
+.barn {background: rgb(var(--raised)); color: rgb(var(--muted))}
+
+.state-empty p, .state-error p {font-size: 16px; line-height: 24px}
+.state-empty, .state-error {padding: 28px 16px}
+
+.sk-line {height: 14px; margin-top: 6px}
+.sk-short {height: 12px}
+.sk-bubble {display: flex; flex-direction: column; gap: 4px; min-width: 220px}
+
+.msg, .msg-err {font-size: 15px; line-height: 21px; color: rgb(var(--muted)); margin-top: 8px}
+.msg-err {color: rgb(var(--danger))}
+
+/* Forum: the write form, pinned at the top with its Cancel in reach. */
+.form-panel {
+  margin: 0 16px 8px;
+  padding: 12px 14px 16px;
+  border: 1px solid rgb(var(--line));
+  border-radius: 12px;
+  background: rgb(var(--surface));
+}
+.form-top {display: flex; align-items: center; gap: 8px; margin-bottom: 4px}
+.form-title {font-weight: 700; font-size: 18px}
+
+.ghost {background: none; border: 0; cursor: pointer; font: inherit}
+.ghost.inline {min-height: 0; padding: 0; font-size: 15px; text-decoration: underline}
+.ghost:focus-visible {outline: 2px solid rgb(var(--focus)); outline-offset: 2px}
+
+/* Tanya AI: the warning stays in view, the chat reads like a conversation. */
+.warn {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 16px 14px;
+  padding: 10px 12px;
+  border: 1px solid rgb(var(--line));
+  border-left: 4px solid rgb(var(--straw));
+  border-radius: 10px;
+  background: rgb(var(--straw-bg));
+  color: rgb(var(--straw));
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.chat {display: flex; flex-direction: column; gap: 12px; margin: 0 16px; padding-bottom: 12px}
+.bubble {max-width: 88%; padding: 12px 14px; border-radius: 14px; font-size: 17px; line-height: 26px; white-space: pre-wrap}
+.bubble.me {align-self: flex-end; background: rgb(var(--accent)); color: rgb(var(--on-accent)); border-bottom-right-radius: 4px}
+.bubble.ai {align-self: flex-start; background: rgb(var(--surface)); border: 1px solid rgb(var(--line)); border-bottom-left-radius: 4px}
+.chat-hint {font-size: 17px; line-height: 26px; color: rgb(var(--muted)); margin: 0 0 4px}
+
+.composer {margin: 4px 16px 0}
+.composer .acts {margin-top: 10px}
