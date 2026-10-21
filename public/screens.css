@@ -1,0 +1,139 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  width: 390px;
+  min-height: 1180px;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: ui-rounded,system-ui,sans-serif;
+  font-size: 18px;
+  line-height: 26px;
+  position: relative;
+  box-sizing: border-box;
+  padding-bottom: 150px;
+}
+
+.app * {box-sizing:border-box;margin:0;padding:0}
+
+.hd {
+  padding: 20px 16px 12px;
+}
+
+.hd b {font-size:28px;line-height:36px;font-weight:700;color:rgb(var(--accent));display:block}
+
+.hd span {font-size:16px;line-height:22px;color:rgb(var(--muted))}
+
+.field {display:block;width:100%;min-height:52px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));padding:12px 12px 12px 44px;font:inherit;color:rgb(var(--muted))}
+
+.sw {position:relative;margin:0 16px}
+
+.sw svg {position:absolute;left:12px;top:16px;color:rgb(var(--muted))}
+
+.chips {display:flex;gap:8px;padding:12px 16px;overflow:hidden}
+
+.chip {min-height:44px;padding:0 16px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;font-size:16px;font-weight:600;white-space:nowrap;color:rgb(var(--fg))}
+
+.chip.on {background:rgb(var(--accent));color:rgb(var(--on-accent));border-color:rgb(var(--accent))}
+
+.list {margin:0 16px;list-style:none;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;gap:12px;padding:14px 16px;border-top:1px solid rgb(var(--line));align-items:flex-start;min-height:56px}
+
+.list-row:first-child {border-top:0}
+
+.ic {width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+
+.cow {background:rgb(var(--earth-bg));color:rgb(var(--earth))}
+
+.goat {background:rgb(var(--straw-bg));color:rgb(var(--straw))}
+
+.hen {background:rgb(var(--raised));color:rgb(var(--accent))}
+
+.q {font-weight:600;flex:1;padding-top:7px}
+
+.a {font-size:16px;line-height:24px;color:rgb(var(--muted));margin-top:8px;font-weight:400}
+
+.cv {flex:none;margin-top:8px;color:rgb(var(--muted))}
+
+.sl {margin:4px 17px 8px;font-size:16px;font-weight:500;color:rgb(var(--muted))}
+
+.ask {margin:16px 16px 0;min-height:56px;border-radius:12px;background:rgb(var(--accent));color:rgb(var(--on-accent));display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:18px}
+
+.foot {position:absolute;left:0;right:0;bottom:0;background:rgb(var(--surface));border-top:1px solid rgb(var(--line))}
+
+.foot p {text-align:center;font-size:14px;line-height:20px;color:rgb(var(--muted));padding:8px}
+
+.tabs {display:flex}
+
+.tab {flex:1;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:15px;font-weight:600;color:rgb(var(--muted))}
+
+.tab.on {color:rgb(var(--accent))}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.app {
+  width: 390px;
+  min-height: 1240px;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: ui-rounded,system-ui,sans-serif;
+  font-size: 18px;
+  line-height: 26px;
+  position: relative;
+  box-sizing: border-box;
+  padding-bottom: 150px;
+}
+
+.hd {
+  padding: 20px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hd div {flex:1}
+
+.btn-primary,.btn-secondary {min-height:48px;padding:0 16px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:16px}
+
+.btn-primary {background:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.btn-secondary {border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg))}
+
+.sm {min-height:44px;padding:0 12px;font-size:15px}
+
+.ghost {min-height:44px;padding:0 8px;display:inline-flex;align-items:center;font-size:15px;color:rgb(var(--muted));font-weight:600}
+
+.list-row {display:flex;gap:12px;padding:14px 16px;border-top:1px solid rgb(var(--line));align-items:flex-start}
+
+.m {flex:1;min-width:0}
+
+.t {font-weight:600}
+
+.meta {font-size:15px;line-height:22px;color:rgb(var(--muted));margin-top:2px}
+
+.body {font-size:17px;line-height:26px;margin-top:10px}
+
+.acts {display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+
+.rep {margin-top:14px;border-left:3px solid rgb(var(--line));padding-left:12px}
+
+.rep p {font-size:16px;line-height:24px}
+
+.rep .meta {margin:0 0 10px}
+
+.field {display:block;width:100%;min-height:48px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));padding:12px;font-size:16px;color:rgb(var(--muted))}
+
+.lbl {font-size:15px;font-weight:600;margin:14px 0 6px}

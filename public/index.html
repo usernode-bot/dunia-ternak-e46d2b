@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,54 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🐄</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Dunia Ternak</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div class="app">
+    <div class="hd"><b>TernakKu</b><span>Jawaban praktis untuk peternak kecil</span></div>
+    <div class="sw"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><div class="field">Cari, mis. kembung</div></div>
+    <div class="chips"><span class="chip on">Semua</span><span class="chip">Sapi</span><span class="chip">Kambing &amp; Domba</span><span class="chip">Ayam</span><span class="chip">Umum</span></div>
+    <p class="sl">15 pertanyaan</p>
+    <ul class="list">
+    <li class="list-row"><span class="ic cow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3 2M21 8l-3 2"/><path d="M7 7h10l1 6a6 6 0 0 1-12 0z"/><path d="M10 15h4"/></svg></span><div class="q">Berapa lama sapi bunting?<div class="a">Sekitar 9 bulan (±280 hari). Pisahkan induk ke kandang tenang menjelang melahirkan dan siapkan alas bersih.</div></div><svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg></li>
+    <li class="list-row"><span class="ic goat"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3c-2 1-3 3-3 5M16 3c2 1 3 3 3 5"/><path d="M8 8h8l-1 8-3 4-3-4z"/></svg></span><div class="q">Berapa lama kambing bunting?</div><svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></li>
+    <li class="list-row"><span class="ic cow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3 2M21 8l-3 2"/><path d="M7 7h10l1 6a6 6 0 0 1-12 0z"/><path d="M10 15h4"/></svg></span><div class="q">Apa tanda sapi birahi?</div><svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></li>
+    <li class="list-row"><span class="ic hen"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6a3 3 0 0 1 6 0v2l3 2-3 1v3a5 5 0 0 1-6 0z"/><path d="M12 5v1"/></svg></span><div class="q">Kapan ayam divaksin ND?</div><svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></li>
+    <li class="list-row"><span class="ic hen"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6a3 3 0 0 1 6 0v2l3 2-3 1v3a5 5 0 0 1-6 0z"/><path d="M12 5v1"/></svg></span><div class="q">Berapa hari telur ayam menetas?</div><svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></li>
+    <li class="list-row"><span class="ic goat"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3c-2 1-3 3-3 5M16 3c2 1 3 3 3 5"/><path d="M8 8h8l-1 8-3 4-3-4z"/></svg></span><div class="q">Kambing kembung, apa yang dilakukan?</div><svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></li>
+    <li class="list-row"><span class="ic cow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3 2M21 8l-3 2"/><path d="M7 7h10l1 6a6 6 0 0 1-12 0z"/><path d="M10 15h4"/></svg></span><div class="q">Apa gejala PMK pada sapi?</div><svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></li>
+    <li class="list-row"><span class="ic goat"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3c-2 1-3 3-3 5M16 3c2 1 3 3 3 5"/><path d="M8 8h8l-1 8-3 4-3-4z"/></svg></span><div class="q">Bagaimana mencegah cacingan?</div><svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></li>
+    </ul>
+    <div class="ask"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Tanya AI</div>
+    <div class="foot"><p>Informasi umum, bukan pengganti dokter hewan.</p>
+    <div class="tabs"><div class="tab on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17v.1"/></svg>FAQ</div><div class="tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Forum</div><div class="tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>Tanya AI</div></div></div>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div class="app">
+      <div class="hd"><div><b>Forum</b><span>Tanya dan berbagi sesama peternak</span></div><span class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tulis</span></div>
+      <p class="sl">Pertanyaan terbaru</p>
+      <ul class="list">
+      <li class="list-row"><span class="ic goat"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3c-2 1-3 3-3 5M16 3c2 1 3 3 3 5"/><path d="M8 8h8l-1 8-3 4-3-4z"/></svg></span><div class="m"><div class="t">Kambing saya tidak mau makan sejak kemarin</div><div class="meta">Pak Contoh · 2 jam lalu · 2 balasan</div>
+      <p class="body">Umur 1 tahun, perut agak besar sebelah kiri. Minum masih mau. Apa perlu panggil mantri?</p>
+      <div class="acts"><span class="btn-secondary sm"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>Tanya AI</span><span class="ghost">Laporkan</span></div>
+      <div class="rep"><div class="meta"><b>Bu Uji Coba</b> · 1 jam lalu</div><p>Kalau perut kiri kembung, cepat hubungi dokter hewan. Jangan diberi makan rumput basah dulu.</p></div>
+      <div class="rep"><div class="meta"><b>Mas Sampel</b> · 40 menit lalu</div><p>Setuju, kembung bisa cepat parah. Sambil menunggu, ajak kambing berjalan pelan.</p></div>
+      <div class="lbl">Balasan</div><div class="field" style="min-height:72px">Tulis balasan</div>
+      <div class="lbl">Nama panggilan</div><div class="field">mis. Pak Tani</div>
+      <div class="acts"><span class="btn-secondary">Kirim balasan</span></div></div></li>
+      <li class="list-row"><span class="ic cow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3 2M21 8l-3 2"/><path d="M7 7h10l1 6a6 6 0 0 1-12 0z"/><path d="M10 15h4"/></svg></span><div class="m"><div class="t">Sapi sudah 3 bulan setelah IB, bagaimana tahu bunting?</div><div class="meta">Kamu · kemarin · 1 balasan</div></div></li>
+      <li class="list-row"><span class="ic hen"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6a3 3 0 0 1 6 0v2l3 2-3 1v3a5 5 0 0 1-6 0z"/><path d="M12 5v1"/></svg></span><div class="m"><div class="t">Ayam kampung mengantuk dan jengger pucat</div><div class="meta">Kang Demo · 2 hari lalu · 3 balasan</div></div></li>
+      <li class="list-row"><span class="ic hen"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6a3 3 0 0 1 6 0v2l3 2-3 1v3a5 5 0 0 1-6 0z"/><path d="M12 5v1"/></svg></span><div class="m"><div class="t">Suhu mesin tetas berapa derajat?</div><div class="meta">Ibu Fiktif · 3 hari lalu · belum ada balasan</div></div></li>
+      </ul>
+      <div class="foot"><p>Informasi umum, bukan pengganti dokter hewan.</p>
+      <div class="tabs"><div class="tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17v.1"/></svg>FAQ</div><div class="tab on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Forum</div><div class="tab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>Tanya AI</div></div></div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
