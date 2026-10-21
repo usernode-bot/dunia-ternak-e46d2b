@@ -29,30 +29,38 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 250 248 242;    /* the page */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
+    --raised: 241 238 228;    /* hovers, badges */
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --line: 228 224 212;      /* borders, dividers, skeletons */
+    --accent: 47 107 62;     /* the one accent */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 47 107 62;       /* the keyboard focus ring */
+    --straw: 138 98 10; /* from the spec's screens */
+    --straw-bg: 250 236 190; /* from the spec's screens */
+    --earth: 110 72 46; /* from the spec's screens */
+    --earth-bg: 236 222 210; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
-    --danger: 248 113 113;
-    --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --ground: 22 24 19;       /* the page */
+    --surface: 32 35 28;      /* lists, cards, fields */
+    --raised: 44 48 39;       /* hovers, badges */
+    --fg: 240 238 230;        /* text */
+    --muted: 176 170 158;     /* secondary text */
+    --line: 62 66 55;         /* borders, dividers, skeletons */
+    --accent: 134 196 140;    /* the one accent */
+    --on-accent: 16 40 22;    /* text on the accent */
+    --danger: 248 132 132;
+    --on-danger: 60 10 10;
+    --focus: 168 220 172;     /* the keyboard focus ring */
+    --straw: 228 188 92;
+    --straw-bg: 70 55 22;
+    --earth: 214 170 136;
+    --earth-bg: 64 45 31;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

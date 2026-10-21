@@ -1,27 +1,31 @@
-# Dunia Ternak
+# TernakKu
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Panduan ternak dalam bahasa Indonesia untuk peternak kecil, berjalan di
+Homeroom. Satu layar dengan tiga tab:
 
-The scaffold is a small working demo that proves the plumbing works:
+- **FAQ**: 15 pertanyaan umum soal sapi, kambing dan domba, ayam, serta
+  urusan kandang. Ada kolom cari dan saringan per hewan; tiap pertanyaan
+  dibuka dan ditutup dengan sekali ketuk.
+- **Forum**: peternak menulis pertanyaan (judul, isi, nama panggilan) dan
+  membalas pertanyaan orang lain. Postingan terbaru di atas dan tersimpan di
+  database, jadi semua pengguna melihatnya. Tiap postingan punya tombol
+  Tanya AI, Laporkan, dan Hapus untuk postingan sendiri.
+- **Tanya AI**: percakapan singkat soal ternak lewat layanan AI Homeroom.
+  Jawabannya umum, singkat, dan selalu menyarankan dokter hewan atau dinas
+  peternakan untuk kasus berat, darurat, atau penyakit menular.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+Footer di semua tab: "Informasi umum, bukan pengganti dokter hewan."
 
-## Replacing the template
+## Menjalankan
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+```sh
+npm ci --include=dev
+npm run build      # menyusun public/tailwind.css
+npm start          # butuh DATABASE_URL
+```
 
-Once the real app exists, rewrite this README to describe it.
+Di Homeroom, pratinjau staging dengan `?demo=1` menampilkan forum contoh
+dengan nama panggilan yang jelas palsu, plus pertanyaan milik penampil.
+Demo itu hanya muncul di staging dan tidak pernah di produksi.
+
+Lihat `CLAUDE.md` untuk aturan platform dan catatan desain aplikasi ini.

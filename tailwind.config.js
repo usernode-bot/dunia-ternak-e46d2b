@@ -55,11 +55,15 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        straw: token('straw'), // goats and sheep: the marker's ink
+        'straw-bg': token('straw-bg'), // ... and its pale ground
+        earth: token('earth'), // cattle: the marker's ink
+        'earth-bg': token('earth-bg'), // ... and its pale ground
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
-        small: ['0.875rem', { lineHeight: '1.25rem' }],
-        body: ['1rem', { lineHeight: '1.5rem' }],
+        small: ['1rem', { lineHeight: '1.375rem' }],
+        body: ['1.125rem', { lineHeight: '1.625rem' }],
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },

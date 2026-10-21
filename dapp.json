@@ -8,5 +8,27 @@
   "governance": {
     "preset": "you_or_the_group"
   },
-  "tests": []
+  "llm": {
+    "purpose": "Menjawab pertanyaan peternakan dalam bahasa Indonesia"
+  },
+  "tests": [
+    {
+      "name": "FAQ",
+      "path": "/",
+      "expectText": "Berapa lama sapi bunting?"
+    },
+    {
+      "id": "forum-demo",
+      "name": "Forum demo",
+      "path": "/?demo=1#forum",
+      "expectSelector": "[data-post]",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "AI warning",
+      "path": "/#ai",
+      "expectText": "Jawaban AI bersifat umum dan bisa keliru."
+    }
+  ]
 }
