@@ -1,0 +1,15 @@
+{
+  "note": "The featured card this app's creator was shown while it was being made: its emoji (also the app's icon, set in dapp.json), a tagline and a few points that sum up the description in a few words. It is a picture of the idea, not a design: it shows no screen and sets no layout, words or colours. Build from the description in the first version's request; where the two differ, the description wins.",
+  "kind": "featured-card",
+  "emoji": "🐄",
+  "tagline": "Panduan ternak untuk peternak kecil",
+  "points": [
+    "Cari jawaban soal bunting, pakan dan penyakit",
+    "Berbagi pertanyaan dan balasan di forum",
+    "Tanya AI soal ternak, dengan peringatan jelas",
+    "Saran hubungi dokter hewan untuk kasus berat"
+  ],
+  "source": "model",
+  "model": "deepseek/deepseek-v4.1-flash-1017",
+  "createdAt": "2026-10-21T17:23:02.919Z"
+}

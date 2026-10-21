@@ -1,0 +1,11 @@
+.env
+.env.*
+.git
+.claude
+node_modules
+public/tailwind.css
+README.md
+CLAUDE.md
+LICENSE
+dapp.json
+design

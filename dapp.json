@@ -1,0 +1,12 @@
+{
+  "description": "Panduan ternak untuk peternak kecil",
+  "category": "other",
+  "icon": {
+    "emoji": "🐄"
+  },
+  "secrets": [],
+  "governance": {
+    "preset": "you_or_the_group"
+  },
+  "tests": []
+}
