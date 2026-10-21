@@ -56,11 +56,11 @@
 
 .ic {width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
 
-.cow {background:rgb(var(--earth-bg));color:rgb(var(--earth))}
+.cow, .sapi {background:rgb(var(--earth-bg));color:rgb(var(--earth))}
 
-.goat {background:rgb(var(--straw-bg));color:rgb(var(--straw))}
+.goat, .kambing {background:rgb(var(--straw-bg));color:rgb(var(--straw))}
 
-.hen {background:rgb(var(--raised));color:rgb(var(--accent))}
+.hen, .ayam {background:rgb(var(--raised));color:rgb(var(--accent))}
 
 .q {font-weight:600;flex:1;padding-top:7px}
 
@@ -183,7 +183,7 @@ select.field {appearance: none; background-image: none}
 .ta {min-height: 88px; resize: vertical; font-family: inherit; line-height: 26px}
 
 /* Umum: the fourth animal marker, a barn on the raised ground. */
-.barn {background: rgb(var(--raised)); color: rgb(var(--muted))}
+.barn, .umum {background: rgb(var(--raised)); color: rgb(var(--muted))}
 
 .state-empty p, .state-error p {font-size: 16px; line-height: 24px}
 .state-empty, .state-error {padding: 28px 16px}
