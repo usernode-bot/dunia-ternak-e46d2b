@@ -28,6 +28,12 @@
       ]
     },
     {
+      "name": "Forum photo",
+      "path": "/?demo=1#forum",
+      "expectSelector": "[data-post] img.photo-thumb",
+      "expectText": "ada foto"
+    },
+    {
       "name": "AI warning",
       "path": "/#ai",
       "expectText": "Jawaban AI bersifat umum dan bisa keliru."

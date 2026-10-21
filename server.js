@@ -195,6 +195,14 @@ async function ensureSchema() {
       created_at timestamptz NOT NULL DEFAULT now()
     );
     CREATE INDEX IF NOT EXISTS forum_replies_post ON forum_replies (post_id);
+    -- A livestock photo rides along with a question or a reply. The IMAGE
+    -- ITSELF never lives here: photo_url is the platform storage URL and
+    -- photo_id the stored file's id ("App file storage" in the platform
+    -- conventions). Null means a text-only post, which stays the norm.
+    ALTER TABLE forum_posts ADD COLUMN IF NOT EXISTS photo_url text;
+    ALTER TABLE forum_posts ADD COLUMN IF NOT EXISTS photo_id text;
+    ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS photo_url text;
+    ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS photo_id text;
     CREATE TABLE IF NOT EXISTS forum_reports (
       id serial PRIMARY KEY,
       user_id text NOT NULL,
@@ -216,6 +224,31 @@ function textField(value, max, min) {
   return text;
 }
 
+// A photo reference from a request body: the { id, url } a successful
+// platform upload returns. Only a URL that really is that stored file is
+// accepted, so a crafted body cannot put an arbitrary link (or a
+// javascript: URL) into a forum post. Returns undefined when the body
+// carries no photo at all, and null when it carries a bad one.
+const PHOTO_ID = /^[a-f0-9]{32}$/;
+
+function photoField(value) {
+  if (value == null) return undefined;
+  if (typeof value !== 'object') return null;
+  const id = typeof value.id === 'string' ? value.id.trim() : '';
+  const raw = typeof value.url === 'string' ? value.url.trim() : '';
+  if (!PHOTO_ID.test(id) || raw.length > 500) return null;
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+  if (parsed.pathname !== '/app-files/' + id) return null;
+  if (parsed.search || parsed.hash) return null;
+  return { id, url: parsed.toString() };
+}
+
 function iso(value) {
   return value instanceof Date ? value.toISOString() : value;
 }
@@ -224,11 +257,28 @@ function iso(value) {
 // forum can be seen. Fixed demo keys make it idempotent; none of it is
 // shown unless the staging preview is opened with ?demo=1.
 const DEMO_HOURS = (h) => new Date(Date.now() - Math.round(h * 3600_000));
+
+// A stand-in for a photo in staging demo rows. Platform files are not copied
+// into staging, so the demo carries a tiny drawn placeholder (a data URI,
+// not a real upload) and the photo layout can still be reviewed. It is
+// obviously not a real farmer's photo.
+const DEMO_PHOTO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200">' +
+  '<rect width="320" height="200" fill="#f1eee4"/>' +
+  '<rect x="16" y="16" width="288" height="168" rx="12" fill="#ffffff" stroke="#e4ded4"/>' +
+  '<g transform="translate(112 38) scale(4)" fill="none" stroke="#2f6b3e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+  '<path d="M4 10l8-6 8 6"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>' +
+  '</g>' +
+  '<text x="160" y="160" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" fill="#57534e">Contoh foto di pratinjau</text>' +
+  '</svg>'
+);
+
 const DEMO_POSTS = [
   {
     key: 'p1', user: 'demo:pak-contoh', nick: 'Pak Contoh', cat: 'kambing', hours: 2,
     title: 'Kambing saya tidak mau makan sejak kemarin',
     body: 'Umur 1 tahun, perut agak besar sebelah kiri. Minum masih mau. Apa perlu panggil mantri?',
+    photo: DEMO_PHOTO,
     replies: [
       { user: 'demo:bu-uji', nick: 'Bu Uji Coba', hours: 1, body: 'Kalau perut kiri kembung, cepat hubungi dokter hewan. Jangan diberi makan rumput basah dulu.' },
       { user: 'demo:mas-sampel', nick: 'Mas Sampel', hours: 0.7, body: 'Setuju, kembung bisa cepat parah. Sambil menunggu, ajak kambing berjalan pelan.' },
@@ -238,10 +288,11 @@ const DEMO_POSTS = [
     key: 'p2', user: 'demo:kang-demo', nick: 'Kang Demo', cat: 'ayam', hours: 26,
     title: 'Ayam kampung mengantuk dan jengger pucat',
     body: 'Tiga ekor dari 20 mulai lemas, nafsu makan turun. Apakah tanda cacingan atau penyakit lain?',
+    photo: DEMO_PHOTO,
     replies: [
       { user: 'demo:bu-uji', nick: 'Bu Uji Coba', hours: 24, body: 'Pisahkan yang lemas dulu. Kalau ada kematian mendadak, laporkan ke dinas peternakan.' },
       { user: 'demo:pak-contoh', nick: 'Pak Contoh', hours: 20, body: 'Saya pernah seperti ini, ternyata cacing. Lebih aman periksa kotoran ke mantri.' },
-      { user: 'demo:mas-sampel', nick: 'Mas Sampel', hours: 18, body: 'Cek juga kandangnya, kalau lembap ayam gampang sakit.' },
+      { user: 'demo:mas-sampel', nick: 'Mas Sampel', hours: 18, body: 'Cek juga kandangnya, kalau lembap ayam gampang sakit.', photo: DEMO_PHOTO },
     ],
   },
   {
@@ -304,11 +355,11 @@ async function seedDemoForum() {
   for (const p of DEMO_POSTS) {
     const when = DEMO_HOURS(p.hours);
     const inserted = await pool.query(
-      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, demo_key, created_at)
-       VALUES ($1,$2,$3,$4,$5,true,$6,$7)
+      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, demo_key, created_at, photo_url)
+       VALUES ($1,$2,$3,$4,$5,true,$6,$7,$8)
        ON CONFLICT (user_id, demo_key) DO NOTHING
        RETURNING id`,
-      [p.user, p.nick, p.cat, p.title, p.body, p.key, when]
+      [p.user, p.nick, p.cat, p.title, p.body, p.key, when, p.photo || null]
     );
     let postId = inserted.rows[0] && inserted.rows[0].id;
     if (!postId) {
@@ -321,13 +372,13 @@ async function seedDemoForum() {
     if (!postId) continue;
     for (const r of p.replies) {
       await pool.query(
-        `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo, created_at)
-         SELECT $1,$2,$3,$4,true,$5
+        `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo, created_at, photo_url)
+         SELECT $1,$2,$3,$4,true,$5,$6
          WHERE NOT EXISTS (
            SELECT 1 FROM forum_replies
            WHERE post_id = $1 AND user_id = $2 AND is_demo AND body = $4
          )`,
-        [postId, r.user, r.nick, r.body, DEMO_HOURS(r.hours)]
+        [postId, r.user, r.nick, r.body, DEMO_HOURS(r.hours), r.photo || null]
       );
     }
   }
@@ -337,11 +388,12 @@ async function seedDemoForum() {
 // ?demo=1, and marked demo so no other route shows it.
 async function ensureOwnDemoPost(userId) {
   const inserted = await pool.query(
-    `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, demo_key, created_at)
-     VALUES ($1,'Kamu',$2,$3,$4,true,'own',$5)
+    `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, demo_key, created_at, photo_url)
+     VALUES ($1,'Kamu',$2,$3,$4,true,'own',$5,$6)
      ON CONFLICT (user_id, demo_key) DO NOTHING
      RETURNING id`,
-    [userId, OWN_DEMO_POST.category, OWN_DEMO_POST.title, OWN_DEMO_POST.body, DEMO_HOURS(24)]
+    [userId, OWN_DEMO_POST.category, OWN_DEMO_POST.title, OWN_DEMO_POST.body,
+      DEMO_HOURS(24), DEMO_PHOTO]
   );
   const postId = inserted.rows[0] && inserted.rows[0].id;
   if (!postId) return;
@@ -360,7 +412,7 @@ app.get('/api/posts', async (req, res) => {
   try {
     if (demo) await ensureOwnDemoPost(userId);
     const posts = await pool.query(
-      `SELECT id, user_id, nickname, category, title, body, created_at,
+      `SELECT id, user_id, nickname, category, title, body, created_at, photo_url, photo_id,
               (user_id = $1) AS mine
        FROM forum_posts
        WHERE (NOT is_demo OR $2::boolean)
@@ -372,7 +424,8 @@ app.get('/api/posts', async (req, res) => {
     if (ids.length) {
       replies = (
         await pool.query(
-          `SELECT id, post_id, user_id, nickname, body, created_at, (user_id = $1) AS mine
+          `SELECT id, post_id, user_id, nickname, body, created_at, photo_url, photo_id,
+                  (user_id = $1) AS mine
            FROM forum_replies
            WHERE post_id = ANY($2::int[])
            ORDER BY created_at ASC, id ASC`,
@@ -380,6 +433,9 @@ app.get('/api/posts', async (req, res) => {
         )
       ).rows;
     }
+    const photoOf = (row) => (row.photo_url
+      ? { id: row.photo_id || null, url: row.photo_url }
+      : null);
     res.json({
       posts: posts.rows.map((p) => ({
         id: p.id,
@@ -389,6 +445,7 @@ app.get('/api/posts', async (req, res) => {
         body: p.body,
         created_at: iso(p.created_at),
         mine: p.mine === true,
+        photo: photoOf(p),
         replies: replies
           .filter((r) => r.post_id === p.id)
           .map((r) => ({
@@ -397,6 +454,7 @@ app.get('/api/posts', async (req, res) => {
             body: r.body,
             created_at: iso(r.created_at),
             mine: r.mine === true,
+            photo: photoOf(r),
           })),
       })),
     });
@@ -411,15 +469,18 @@ app.post('/api/posts', async (req, res) => {
   const title = textField(req.body && req.body.title, 120);
   const body = textField(req.body && req.body.body, 2000);
   const nickname = textField(req.body && req.body.nickname, 40);
+  const photo = photoField(req.body && req.body.photo);
   if (!CATEGORIES.has(category) || !title || !body || !nickname) {
     return res.status(400).json({ error: 'invalid_post' });
   }
+  if (photo === null) return res.status(400).json({ error: 'invalid_photo' });
   try {
     const result = await pool.query(
-      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo)
-       VALUES ($1,$2,$3,$4,$5,false)
+      `INSERT INTO forum_posts (user_id, nickname, category, title, body, is_demo, photo_url, photo_id)
+       VALUES ($1,$2,$3,$4,$5,false,$6,$7)
        RETURNING id, created_at`,
-      [req.user.id, nickname, category, title, body]
+      [req.user.id, nickname, category, title, body,
+        photo ? photo.url : null, photo ? photo.id : null]
     );
     res.status(201).json({ id: result.rows[0].id, created_at: iso(result.rows[0].created_at) });
   } catch (err) {
@@ -432,17 +493,20 @@ app.post('/api/posts/:id/replies', async (req, res) => {
   const id = Number(req.params.id);
   const body = textField(req.body && req.body.body, 2000);
   const nickname = textField(req.body && req.body.nickname, 40);
+  const photo = photoField(req.body && req.body.photo);
   if (!Number.isInteger(id) || id <= 0 || !body || !nickname) {
     return res.status(400).json({ error: 'invalid_reply' });
   }
+  if (photo === null) return res.status(400).json({ error: 'invalid_photo' });
   try {
     const exists = await pool.query('SELECT 1 FROM forum_posts WHERE id = $1', [id]);
     if (!exists.rowCount) return res.status(404).json({ error: 'not_found' });
     const result = await pool.query(
-      `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo)
-       VALUES ($1,$2,$3,$4,false)
+      `INSERT INTO forum_replies (post_id, user_id, nickname, body, is_demo, photo_url, photo_id)
+       VALUES ($1,$2,$3,$4,false,$5,$6)
        RETURNING id`,
-      [id, req.user.id, nickname, body]
+      [id, req.user.id, nickname, body,
+        photo ? photo.url : null, photo ? photo.id : null]
     );
     res.status(201).json({ id: result.rows[0].id });
   } catch (err) {

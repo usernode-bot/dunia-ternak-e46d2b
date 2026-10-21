@@ -137,6 +137,14 @@
           <input id="post-title" class="field" maxlength="120" placeholder="mis. Kambing tidak mau makan" required>
           <label class="lbl" for="post-body">Pertanyaan</label>
           <textarea id="post-body" class="field ta" maxlength="2000" placeholder="Ceritakan kondisi ternakmu" required></textarea>
+          <p class="lbl">Foto ternak (opsional)</p>
+          <div class="attach" role="group" aria-label="Foto ternak (opsional)">
+            <button type="button" class="btn-secondary sm" id="post-photo-camera"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Ambil foto</button>
+            <button type="button" class="btn-secondary sm" id="post-photo-gallery"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>Dari galeri</button>
+          </div>
+          <input id="post-photo-camera-input" type="file" accept="image/*" capture="environment" hidden>
+          <input id="post-photo-gallery-input" type="file" accept="image/*" hidden>
+          <div id="post-photo-preview"></div>
           <label class="lbl" for="post-nick">Nama panggilan</label>
           <input id="post-nick" class="field" maxlength="40" placeholder="mis. Pak Tani" required>
           <div class="acts">
@@ -353,6 +361,168 @@
 
     renderFaq();
 
+    // ── Photo attach ───────────────────────────────────────────────────────
+    // A livestock photo goes from the phone's camera app (the `capture`
+    // input) or the gallery; a desktop browser opens the same picker, so a
+    // device without a camera still works. The picture is shrunk here,
+    // uploaded to the platform's file storage through the bridge, and only
+    // the returned URL travels with the question. The image bytes never go
+    // through this app's server or database.
+    var PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+    var PHOTO_MAX_EDGE = 1280;
+    var PHOTO_CAM_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+    var PHOTO_PIC_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>';
+
+    function photoError(code) {
+      var err = new Error(code);
+      err.code = code;
+      return err;
+    }
+
+    function newPhotoState() {
+      return { state: 'idle', preview: '', photo: null, error: '', gen: 0 };
+    }
+
+    // `gen` counts resets, so an upload that finishes after the photo was
+    // removed (or replaced) cannot put itself back into the composer.
+    function resetPhotoState(st) {
+      if (st.preview) URL.revokeObjectURL(st.preview);
+      st.gen = (st.gen || 0) + 1;
+      st.state = 'idle';
+      st.preview = '';
+      st.photo = null;
+      st.error = '';
+    }
+
+    // Draw the picked photo on a canvas at a phone-friendly size and send it
+    // as JPEG: a 4 MB camera photo becomes a few hundred kilobytes, which
+    // matters on a weak signal.
+    function downscalePhoto(file) {
+      return new Promise(function (resolve, reject) {
+        var url = URL.createObjectURL(file);
+        var img = new Image();
+        function fail() {
+          URL.revokeObjectURL(url);
+          reject(photoError('invalid'));
+        }
+        img.onload = function () {
+          try {
+            var w = img.naturalWidth || img.width;
+            var h = img.naturalHeight || img.height;
+            if (!w || !h) return fail();
+            var scale = Math.min(1, PHOTO_MAX_EDGE / Math.max(w, h));
+            var canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(w * scale));
+            canvas.height = Math.max(1, Math.round(h * scale));
+            var ctx = canvas.getContext('2d');
+            // JPEG has no transparency, so a cut-out PNG would turn black.
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            canvas.toBlob(function (blob) {
+              if (!blob) return reject(photoError('invalid'));
+              // The platform checks the bytes against the extension, so the
+              // name has to be .jpg for the JPEG it just produced.
+              resolve(typeof File === 'function'
+                ? new File([blob], 'foto-ternak.jpg', { type: 'image/jpeg' })
+                : blob);
+            }, 'image/jpeg', 0.82);
+          } catch (err) {
+            fail();
+          }
+        };
+        img.onerror = fail;
+        img.src = url;
+      });
+    }
+
+    async function uploadPhoto(file) {
+      if (!window.usernode || typeof window.usernode.uploadFile !== 'function') {
+        throw photoError('unavailable');
+      }
+      var prepared = await downscalePhoto(file);
+      var stored;
+      try {
+        stored = await window.usernode.uploadFile(prepared, { visibility: 'public' });
+      } catch (err) {
+        throw photoError('failed');
+      }
+      if (!stored || !stored.id || !stored.url) throw photoError('failed');
+      return { id: String(stored.id), url: String(stored.url) };
+    }
+
+    // Start (or restart) the upload for one composer. `render` redraws just
+    // that composer's preview, so text already typed is left alone.
+    async function pickPhoto(st, file, render) {
+      if (!file || st.state === 'uploading') return;
+      resetPhotoState(st);
+      if (!/^image\//.test(file.type || '')) {
+        st.state = 'error';
+        st.error = 'File ini bukan foto. Pilih foto JPG, PNG, atau WebP.';
+        render();
+        return;
+      }
+      if (file.size > PHOTO_MAX_BYTES) {
+        st.state = 'error';
+        st.error = 'Foto terlalu besar. Pilih foto lain (maksimal 5 MB).';
+        render();
+        return;
+      }
+      st.state = 'uploading';
+      st.preview = URL.createObjectURL(file);
+      var gen = st.gen;
+      render();
+      try {
+        var uploaded = await uploadPhoto(file);
+        if (st.gen !== gen) {
+          // Removed while it was uploading: the file is no longer wanted.
+          discardFiles([uploaded]);
+          return;
+        }
+        st.photo = uploaded;
+        st.state = 'ready';
+      } catch (err) {
+        if (st.gen !== gen) return;
+        st.photo = null;
+        st.state = 'error';
+        var code = err && err.code;
+        if (code === 'invalid' && st.preview) {
+          URL.revokeObjectURL(st.preview);
+          st.preview = '';
+        }
+        st.error = code === 'unavailable'
+          ? 'Unggah foto belum tersedia di sini. Pertanyaan tetap bisa dikirim tanpa foto.'
+          : code === 'invalid'
+            ? 'Foto tidak bisa dibaca. Pilih foto lain.'
+            : 'Foto gagal diunggah. Periksa koneksi lalu coba lagi.';
+      }
+      render();
+    }
+
+    function photoStateHtml(st, removeAttr) {
+      if (!st || st.state === 'idle') return '';
+      var msg = '';
+      if (st.state === 'uploading') msg = '<p class="msg">Mengunggah foto…</p>';
+      else if (st.state === 'ready') msg = '<p class="msg">Foto siap dikirim.</p>';
+      else if (st.state === 'error') msg = '<p class="msg-err">' + esc(st.error) + '</p>';
+      return '<div class="thumb-wrap">' +
+        (st.preview ? '<img class="thumb" src="' + esc(st.preview) + '" alt="Pratinjau foto ternak">' : '') +
+        '<div class="thumb-info">' + msg +
+        '<button type="button" class="ghost" ' + removeAttr + '>Hapus foto</button>' +
+        '</div></div>';
+    }
+
+    // The platform deletes only this person's own uploads, so this is
+    // best-effort: a file someone else uploaded just stays where it is.
+    function discardFiles(photos) {
+      if (!window.usernode || typeof window.usernode.deleteFile !== 'function') return;
+      (photos || []).forEach(function (p) {
+        if (!p || !p.id) return;
+        Promise.resolve(window.usernode.deleteFile(p.id)).catch(function () {});
+      });
+    }
+
     // ── Forum ──────────────────────────────────────────────────────────────
     var posts = [];
     var openPosts = {};
@@ -364,6 +534,35 @@
     var postForm = document.getElementById('post-form');
     var postErr = document.getElementById('post-err');
     var forumNew = document.getElementById('forum-new');
+    var postPhoto = newPhotoState();
+    var replyPhotos = {};
+    var postPhotoPreview = document.getElementById('post-photo-preview');
+    var postPhotoInputs = {
+      camera: document.getElementById('post-photo-camera-input'),
+      gallery: document.getElementById('post-photo-gallery-input')
+    };
+
+    function renderPostPhoto() {
+      postPhotoPreview.innerHTML = photoStateHtml(postPhoto, 'id="post-photo-remove"');
+    }
+
+    ['camera', 'gallery'].forEach(function (mode) {
+      document.getElementById('post-photo-' + mode).addEventListener('click', function () {
+        postPhotoInputs[mode].click();
+      });
+      postPhotoInputs[mode].addEventListener('change', function () {
+        var file = postPhotoInputs[mode].files && postPhotoInputs[mode].files[0];
+        postPhotoInputs[mode].value = '';
+        pickPhoto(postPhoto, file, renderPostPhoto);
+      });
+    });
+
+    postPhotoPreview.addEventListener('click', function (ev) {
+      if (!ev.target || ev.target.id !== 'post-photo-remove') return;
+      discardFiles([postPhoto.photo]);
+      resetPhotoState(postPhoto);
+      renderPostPhoto();
+    });
 
     if (DEMO) {
       forumName.innerHTML = 'Pertanyaan terbaru · <span data-usernode-demo-note>Staging demo</span>';
@@ -399,15 +598,21 @@
         var replies = p.replies.map(function (r) {
           return '<div class="rep"><div class="meta"><b>' + esc(r.nickname) + '</b> · ' + esc(waktu(r.created_at)) +
             (r.mine ? ' · <button type="button" class="ghost inline" data-action="delete-reply" data-id="' + r.id + '">Hapus</button>' : '') +
-            '</div><p>' + esc(r.body) + '</p></div>';
+            '</div><p>' + esc(r.body) + '</p>' +
+            (r.photo ? '<img class="photo sm" src="' + esc(r.photo.url) + '" alt="Foto ternak" loading="lazy" decoding="async">' : '') +
+            '</div>';
         }).join('');
         return '<li class="list-row" data-post="' + p.id + '">' +
           '<span class="ic ' + esc(p.category) + '">' + (ICONS[p.category] || ICONS.umum) + '</span>' +
           '<div class="m">' +
             '<div class="t" role="button" tabindex="0" aria-expanded="' + (open ? 'true' : 'false') + '" data-toggle="' + p.id + '">' + esc(p.title) + '</div>' +
-            '<div class="meta">' + (mine ? 'Kamu' : esc(p.nickname)) + ' · ' + esc(waktu(p.created_at)) + ' · ' + repliesLabel(p.replies.length) + '</div>' +
+            '<div class="meta">' + (mine ? 'Kamu' : esc(p.nickname)) + ' · ' + esc(waktu(p.created_at)) + ' · ' + repliesLabel(p.replies.length) + (p.photo ? ' · ada foto' : '') + '</div>' +
+            (p.photo && !open
+              ? '<img class="photo-thumb" src="' + esc(p.photo.url) + '" alt="Foto ternak" loading="lazy" decoding="async">'
+              : '') +
             (open ?
               '<p class="body">' + esc(p.body) + '</p>' +
+              (p.photo ? '<img class="photo" src="' + esc(p.photo.url) + '" alt="Foto ternak" loading="lazy" decoding="async">' : '') +
               '<div class="acts">' +
                 '<button type="button" class="btn-secondary sm" data-action="ai" data-id="' + p.id + '">' + SPARK + 'Tanya AI</button>' +
                 '<button type="button" class="ghost" data-action="report-post" data-id="' + p.id + '">Laporkan</button>' +
@@ -417,6 +622,14 @@
               replies +
               '<div class="lbl">Balasan</div>' +
               '<textarea class="field ta" data-reply-body maxlength="2000" placeholder="Tulis balasan"></textarea>' +
+              '<p class="lbl">Foto ternak (opsional)</p>' +
+              '<div class="attach" role="group" aria-label="Foto ternak (opsional)">' +
+                '<button type="button" class="btn-secondary sm" data-action="reply-photo" data-mode="camera" data-id="' + p.id + '">' + PHOTO_CAM_ICON + 'Ambil foto</button>' +
+                '<button type="button" class="btn-secondary sm" data-action="reply-photo" data-mode="gallery" data-id="' + p.id + '">' + PHOTO_PIC_ICON + 'Dari galeri</button>' +
+              '</div>' +
+              '<input type="file" accept="image/*" capture="environment" data-reply-input="camera" data-id="' + p.id + '" hidden>' +
+              '<input type="file" accept="image/*" data-reply-input="gallery" data-id="' + p.id + '" hidden>' +
+              '<div data-reply-photo-preview="' + p.id + '">' + photoStateHtml(replyPhotos[p.id], 'data-action="reply-photo-remove" data-id="' + p.id + '"') + '</div>' +
               '<div class="lbl">Nama panggilan</div>' +
               '<input class="field" data-reply-nick maxlength="40" placeholder="mis. Pak Tani">' +
               '<div class="acts"><button type="button" class="btn-secondary" data-action="reply" data-id="' + p.id + '">Kirim balasan</button></div>'
@@ -455,6 +668,10 @@
       forumNew.hidden = posts.length === 0;
       postErr.hidden = true;
       forumEmpty.hidden = posts.length !== 0;
+      // An abandoned question leaves its photo unused: remove it.
+      discardFiles([postPhoto.photo]);
+      resetPhotoState(postPhoto);
+      renderPostPhoto();
     }
     forumNew.addEventListener('click', openForm);
     document.getElementById('forum-empty-new').addEventListener('click', openForm);
@@ -477,6 +694,15 @@
         setFormError('Isi judul, pertanyaan, dan nama panggilan.');
         return;
       }
+      if (postPhoto.state === 'uploading') {
+        setFormError('Tunggu sebentar, foto masih diunggah.');
+        return;
+      }
+      if (postPhoto.state === 'error') {
+        setFormError('Foto belum berhasil diunggah. Hapus foto atau coba lagi.');
+        return;
+      }
+      if (postPhoto.photo) payload.photo = postPhoto.photo;
       var submit = document.getElementById('post-submit');
       submit.disabled = true;
       try {
@@ -492,6 +718,9 @@
         var created = await res.json();
         postForm.reset();
         document.getElementById('post-category').value = 'umum';
+        // The post keeps the photo; only the form's own copy goes.
+        resetPhotoState(postPhoto);
+        renderPostPhoto();
         closeForm();
         await loadPosts();
         if (created && created.id) {
@@ -559,6 +788,18 @@
         try {
           var d = await api('/api/posts/' + postId, { method: 'DELETE' });
           if (!d.ok) throw new Error('HTTP ' + d.status);
+          // The rows are gone; their uploads are no longer used.
+          if (post) {
+            var ownPhotos = post.replies
+              .filter(function (r) { return r.mine && r.photo; })
+              .map(function (r) { return r.photo; });
+            if (post.photo) ownPhotos.push(post.photo);
+            discardFiles(ownPhotos);
+          }
+          if (replyPhotos[postId]) {
+            resetPhotoState(replyPhotos[postId]);
+            delete replyPhotos[postId];
+          }
           delete openPosts[postId];
           await loadPosts();
         } catch (err) {
@@ -572,6 +813,11 @@
         try {
           var dr = await api('/api/replies/' + postId, { method: 'DELETE' });
           if (!dr.ok) throw new Error('HTTP ' + dr.status);
+          var goneReply = null;
+          posts.forEach(function (p) {
+            p.replies.forEach(function (r) { if (r.id === postId) goneReply = r; });
+          });
+          if (goneReply && goneReply.photo) discardFiles([goneReply.photo]);
           await loadPosts();
         } catch (err) {
           statusFor(postId, 'Balasan gagal dihapus. Coba lagi.');
@@ -579,25 +825,62 @@
         return;
       }
 
+      if (action === 'reply-photo') {
+        var photoLi = btn.closest('[data-post]');
+        var mode = btn.getAttribute('data-mode');
+        var photoInput = photoLi && photoLi.querySelector('[data-reply-input="' + mode + '"]');
+        if (photoInput) photoInput.click();
+        return;
+      }
+
+      if (action === 'reply-photo-remove') {
+        var removeState = replyPhotos[postId];
+        if (removeState) {
+          discardFiles([removeState.photo]);
+          resetPhotoState(removeState);
+          delete replyPhotos[postId];
+        }
+        var previewBox = forumList.querySelector('[data-reply-photo-preview="' + postId + '"]');
+        if (previewBox) previewBox.innerHTML = '';
+        return;
+      }
+
       if (action === 'reply') {
         var li = btn.closest('[data-post]');
         var body = li.querySelector('[data-reply-body]').value.trim();
         var nick = li.querySelector('[data-reply-nick]').value.trim();
+        var replyPhoto = replyPhotos[postId];
         if (!body || !nick) {
           statusFor(postId, 'Isi balasan dan nama panggilan.');
+          return;
+        }
+        if (replyPhoto && replyPhoto.state === 'uploading') {
+          statusFor(postId, 'Tunggu sebentar, foto masih diunggah.');
+          return;
+        }
+        if (replyPhoto && replyPhoto.state === 'error') {
+          statusFor(postId, 'Foto belum berhasil diunggah. Hapus foto atau coba lagi.');
           return;
         }
         btn.disabled = true;
         try {
           var rr = await api('/api/posts/' + postId + '/replies', {
             method: 'POST',
-            body: JSON.stringify({ body: body, nickname: nick })
+            body: JSON.stringify({
+              body: body,
+              nickname: nick,
+              photo: replyPhoto && replyPhoto.photo ? replyPhoto.photo : undefined
+            })
           });
           if (rr.status === 401) {
             statusFor(postId, 'Kamu perlu akun Homeroom untuk membalas.');
             return;
           }
           if (!rr.ok) throw new Error('HTTP ' + rr.status);
+          if (replyPhotos[postId]) {
+            resetPhotoState(replyPhotos[postId]);
+            delete replyPhotos[postId];
+          }
           openPosts[postId] = true;
           await loadPosts();
         } catch (err) {
@@ -606,6 +889,24 @@
           btn.disabled = false;
         }
       }
+    });
+
+    // A reply composer's camera/gallery input starts its upload as soon as a
+    // photo is picked, so "Kirim balasan" does not wait for it.
+    forumList.addEventListener('change', function (ev) {
+      var input = ev.target;
+      if (!input || !input.getAttribute || !input.getAttribute('data-reply-input')) return;
+      var postId = Number(input.getAttribute('data-id'));
+      var file = input.files && input.files[0];
+      input.value = '';
+      replyPhotos[postId] = replyPhotos[postId] || newPhotoState();
+      pickPhoto(replyPhotos[postId], file, function () {
+        var box = forumList.querySelector('[data-reply-photo-preview="' + postId + '"]');
+        if (box) {
+          box.innerHTML = photoStateHtml(replyPhotos[postId],
+            'data-action="reply-photo-remove" data-id="' + postId + '"');
+        }
+      });
     });
 
     // ── Tanya AI ───────────────────────────────────────────────────────────
