@@ -52,6 +52,8 @@ module.exports = {
         line: token('line'), // borders, dividers, skeletons
         accent: token('accent'), // the one accent: the primary action
         'on-accent': token('on-accent'), // text on the accent
+        'accent-soft': token('accent-soft'), // active chip and tab pill
+        'warn-bg': token('warn-bg'), // the firmer disease/medicine note
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring

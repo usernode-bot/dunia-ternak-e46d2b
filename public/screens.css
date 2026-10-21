@@ -32,7 +32,7 @@
   padding: 20px 16px 12px;
 }
 
-.hd b {font-size:28px;line-height:36px;font-weight:700;color:rgb(var(--accent));display:block}
+.hd b {font-size:20px;line-height:28px;font-weight:700;color:rgb(var(--fg));display:block}
 
 .hd span {font-size:16px;line-height:22px;color:rgb(var(--muted))}
 
@@ -46,7 +46,7 @@
 
 .chip {min-height:44px;padding:0 16px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;font-size:16px;font-weight:600;white-space:nowrap;color:rgb(var(--fg))}
 
-.chip.on {background:rgb(var(--accent));color:rgb(var(--on-accent));border-color:rgb(var(--accent))}
+.chip.on {background:rgb(var(--accent-soft));color:rgb(var(--accent));border-color:rgb(var(--accent-soft))}
 
 .list {margin:0 16px;list-style:none;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
 
@@ -69,8 +69,6 @@
 .cv {flex:none;margin-top:8px;color:rgb(var(--muted))}
 
 .sl {margin:4px 17px 8px;font-size:16px;font-weight:500;color:rgb(var(--muted))}
-
-.ask {margin:16px 16px 0;min-height:56px;border-radius:12px;background:rgb(var(--accent));color:rgb(var(--on-accent));display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:18px}
 
 .foot {position:absolute;left:0;right:0;bottom:0;background:rgb(var(--surface));border-top:1px solid rgb(var(--line))}
 
@@ -146,11 +144,17 @@
   max-width: 42rem;
   min-height: 100vh;
   margin: 0 auto;
-  padding-bottom: calc(176px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
 }
 
-/* All five animal filters stay visible: they wrap instead of scrolling. */
-.chips {flex-wrap: wrap; overflow: visible}
+/* The animal filters sit in one row that scrolls sideways. */
+.chips {flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; scroll-padding-inline: 16px}
+.chips::-webkit-scrollbar {display: none}
+.chip {flex: none; gap: 6px}
+.chip[data-cat="sapi"] svg {color: rgb(var(--earth))}
+.chip[data-cat="kambing"] svg {color: rgb(var(--straw))}
+.chip[data-cat="ayam"] svg {color: rgb(var(--accent))}
+.chip[data-cat="umum"] svg {color: rgb(var(--muted))}
 
 .foot {
   position: fixed;
@@ -163,20 +167,6 @@
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
-/* The safety note reads as a warning, in the straw colour Tanya AI uses. */
-.foot p {
-  text-align: left;
-  font-size: 16px;
-  line-height: 22px;
-  font-weight: 600;
-  color: rgb(var(--fg));
-  background: rgb(var(--straw-bg));
-  border-left: 4px solid rgb(var(--straw));
-  border-radius: 10px;
-  margin: 8px 16px 0;
-  padding: 8px 12px;
-}
-
 /* A closed question shows the first two lines of its answer. */
 .a.clip {
   display: -webkit-box;
@@ -187,20 +177,17 @@
   margin-top: 4px;
 }
 
-.faq-group + .faq-group {margin-top: 16px}
+.chip, .tab, .info, .tool, .faq-top {cursor: pointer; font: inherit}
 
-.chip, .tab, .ask {cursor: pointer; font: inherit}
-
-.chip:focus-visible, .tab:focus-visible, .ask:focus-visible,
-.list-row[role="button"]:focus-visible, .t[role="button"]:focus-visible {
+.chip:focus-visible, .tab:focus-visible, .info:focus-visible, .tool:focus-visible,
+.faq-top:focus-visible, .t[role="button"]:focus-visible {
   outline: 2px solid rgb(var(--focus));
   outline-offset: 2px;
 }
 
-.ask {border: 0; width: calc(100% - 32px)}
 .tab {background: none; border: 0}
 
-.sw .field {padding-left: 44px}
+.sw .field {padding-left: 44px; border: 0; background: rgb(var(--raised)); border-radius: 26px}
 .field {color: rgb(var(--fg))}
 .field::placeholder {color: rgb(var(--muted))}
 .field:focus {outline: 2px solid rgb(var(--focus)); outline-offset: 1px}
@@ -236,22 +223,8 @@ select.field {appearance: none; background-image: none}
 .ghost.inline {min-height: 0; padding: 0; font-size: 15px; text-decoration: underline}
 .ghost:focus-visible {outline: 2px solid rgb(var(--focus)); outline-offset: 2px}
 
-/* Tanya AI: the warning stays in view, the chat reads like a conversation. */
-.warn {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  margin: 0 16px 14px;
-  padding: 10px 12px;
-  border: 1px solid rgb(var(--line));
-  border-left: 4px solid rgb(var(--straw));
-  border-radius: 10px;
-  background: rgb(var(--straw-bg));
-  color: rgb(var(--straw));
-  font-size: 16px;
-  line-height: 22px;
-  font-weight: 600;
-}
+/* Tanya AI: a plain note under the header, the chat reads like a conversation. */
+.note {margin: 0 16px 12px; font-size: 16px; line-height: 22px; color: rgb(var(--muted))}
 
 .chat {display: flex; flex-direction: column; gap: 12px; margin: 0 16px; padding-bottom: 12px}
 .bubble {max-width: 88%; padding: 12px 14px; border-radius: 14px; font-size: 17px; line-height: 26px; white-space: pre-wrap}
@@ -261,6 +234,51 @@ select.field {appearance: none; background-image: none}
 
 .composer {margin: 4px 16px 0}
 .composer .acts {margin-top: 10px}
+
+/* Header: the ⓘ button and the safety note it opens. */
+.info {width: 44px; height: 44px; flex: none; border: 0; border-radius: 22px; background: none; color: rgb(var(--muted)); display: inline-flex; align-items: center; justify-content: center}
+.info[aria-expanded="true"] {background: rgb(var(--raised)); color: rgb(var(--fg))}
+.safety {margin: 0 16px 12px; padding: 10px 12px; border-radius: 12px; background: rgb(var(--raised)); font-size: 16px; line-height: 22px}
+
+/* Alat cepat: three small cards in a row, the open one's panel below. */
+.tools {display: flex; gap: 8px; margin: 0 16px 12px}
+.tool {flex: 1; min-width: 0; min-height: 76px; text-align: left; border: 1px solid rgb(var(--line)); border-radius: 12px; background: rgb(var(--surface)); color: rgb(var(--fg)); padding: 10px; font-size: 16px; line-height: 20px; font-weight: 600}
+.tool small {display: block; font-size: 14px; line-height: 18px; font-weight: 400; color: rgb(var(--muted)); margin-top: 4px}
+.tool.on {border-color: rgb(var(--accent)); background: rgb(var(--accent-soft))}
+#tool-panel {margin: 0 16px 16px}
+.tool-out {margin-top: 12px; font-weight: 600}
+.tool-out:empty {display: none}
+.tool-list {margin: 12px 0 0}
+.tool-list .list-row {font-size: 16px; line-height: 24px}
+
+/* FAQ: one card per question, with room between them. */
+.faq-cards {display: flex; flex-direction: column; gap: 12px; margin: 0 16px}
+.faq-card {padding: 0; border: 1px solid rgb(var(--line)); border-radius: 14px; background: rgb(var(--surface))}
+.faq-top {display: flex; gap: 12px; width: 100%; padding: 14px 16px; border: 0; background: none; color: inherit; text-align: left; align-items: flex-start; border-radius: 14px}
+.faq-top .q, .faq-top .qt, .faq-top .a {display: block}
+.faq-top .cv {transition: transform .2s}
+.faq-card.open .faq-top .cv {transform: rotate(180deg)}
+.tag {display: inline-block; margin-top: 8px; font-size: 14px; line-height: 20px; font-weight: 600; padding: 2px 10px; border-radius: 12px}
+.faq-more {display: grid; grid-template-rows: 0fr; transition: grid-template-rows .2s ease}
+.faq-card.open .faq-more {grid-template-rows: 1fr}
+.faq-inner {overflow: hidden; padding: 0 16px 0 68px; visibility: hidden; transition: visibility .2s}
+.faq-card.open .faq-inner {padding-bottom: 16px; visibility: visible}
+.note-thin {font-size: 14px; line-height: 20px; color: rgb(var(--muted)); margin-top: 4px}
+.alert {font-size: 16px; line-height: 22px; font-weight: 600; color: rgb(var(--fg)); background: rgb(var(--warn-bg)); border-left: 3px solid rgb(var(--danger)); border-radius: 8px; padding: 6px 10px}
+@media (prefers-reduced-motion: reduce) {
+  .faq-more, .faq-inner, .faq-top .cv {transition: none}
+}
+
+/* Tanya AI: suggested questions while the chat is empty. */
+.suggest .lbl {margin-top: 4px}
+.chips.sug {padding: 0; flex-wrap: wrap; overflow: visible}
+
+/* Tab bar: the active tab's icon sits in a soft green pill, filled. */
+.pill {display: flex; padding: 2px 18px; border-radius: 16px}
+.tab.on .pill {background: rgb(var(--accent-soft))}
+.tab.on svg {fill: currentColor; fill-opacity: .25}
+.tab.ai .pill {color: rgb(var(--accent))}
+.faq-top .a.clip {display: -webkit-box}
 
 /* Forum and Tanya AI: one camera photo, chosen before sending. */
 [data-photo-control] .lbl {display: block}

@@ -119,23 +119,33 @@ about, add it to `SKIP`. Keep the file and its mount in `server.js`.
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** accent: soft field green; neutrals: cream and warm greys;
-  animal markers: straw yellow (goats and sheep, `straw` / `straw-bg`),
-  earth brown (cattle, `earth` / `earth-bg`), and green on the raised ground
-  for chickens and the barn for Umum. Light and dark values are the tokens
-  in `styles/tailwind-input.css`; the dark look keeps each hue.
+- **Palette:** accent: sage green (`accent`, with `accent-soft` behind
+  accent text for the active chip and tab pill); neutrals: warm cream and
+  green-black (the dark look's ground); animal markers: soft brownish cream
+  (goats and sheep, `straw` / `straw-bg`), earth brown (cattle, `earth` /
+  `earth-bg`), and green on the raised ground for chickens and the barn for
+  Umum. No loud yellow. The firmer disease/medicine note uses `warn-bg` with
+  a `danger` edge. Light and dark values are the tokens in
+  `styles/tailwind-input.css`; the dark look keeps each hue.
 - **Signature element:** a round marker on every FAQ question and forum post
   holding a line drawing of the animal's head (cow, goat, hen) or a small
-  barn for Umum.
-- **Type scale:** `text-title` (28/36), `text-heading` (20/28),
-  `text-body` (18/26), `text-small` (16/22). Body text is 18 px on purpose.
+  barn for Umum. The animal filter chips carry the same drawings, small.
+- **Type scale:** screen titles are `text-heading` (20/28), `text-body`
+  (18/26), `text-small` (16/22), captions 14 px at the smallest. Body text is
+  18 px on purpose.
 - **Photos:** a chosen photo is a 72 px square preview (12 px corners, line
   border); in a post it fills the column (max 360 px tall), in a reply it is
   the same narrower (240 px), and in a chat bubble it sits at the top of the
   bubble (max 240 px wide). No new colours.
-- **Layout:** the header says TernakKu, the tab's content scrolls, and a
-  fixed footer ("Informasi umum, bukan pengganti dokter hewan.") sits above
-  a 64 px tab bar. Buttons and fields are at least 48 px tall.
+- **Layout:** each tab's header has a small title (the FAQ one with a
+  time-of-day greeting) and an ⓘ button that opens the safety note
+  ("Informasi umum, bukan pengganti dokter hewan. ..."). The tab's content
+  scrolls above a fixed 64 px tab bar with no banner; the active tab sits in
+  a soft green pill and Tanya AI's icon is always accent. Safety text also
+  sits under every FAQ answer (a red-edged note on disease/medicine topics)
+  and as one plain line in Tanya AI. FAQ questions are separate cards; the
+  animal filter is one sideways-scrolling row. Buttons and fields are at
+  least 48 px tall.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -166,7 +176,12 @@ Re-theme by changing the token values there, keeping every text pair at
 ## App-specific conventions
 
 - The 15 FAQ answers live in `public/index.html` as the `FAQ` array: they
-  are app content, not stored rows.
+  are app content, not stored rows. `warn: true` marks disease/medicine
+  topics, which get the firmer note.
+- The quick tools (Alat cepat) compute on the phone only. The vaccine and
+  deworming schedule (`SCHEDULE`) gives timing only, never a drug name or
+  dose. Sharing a FAQ shares text only, never the page URL (it carries the
+  viewer's token).
 - The forum is one shared board. Posts carry a nickname typed each time;
   Homeroom's account (`user_id`) decides who may remove a post or reply.
   `forum_reports` only records reports; nothing is hidden automatically.
