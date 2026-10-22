@@ -59,6 +59,23 @@
       "name": "AI photo control",
       "path": "/#ai",
       "expectSelector": "#view-ai [data-photo-control]"
+    },
+    {
+      "name": "Tab Ternakku ada",
+      "path": "/",
+      "expectSelector": ".tab[data-tab=\"ternakku\"]"
+    },
+    {
+      "id": "ternakku-empty",
+      "name": "Ternakku empty state",
+      "path": "/#ternakku",
+      "expectSelector": "#animal-empty-add",
+      "expectText": "Belum ada ternak",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "server.js"
+      ]
     }
   ],
   "visibility": {

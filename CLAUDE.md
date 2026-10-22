@@ -98,12 +98,21 @@ tables you've marked private), etc.
 Panduan ternak untuk peternak kecil
 
 TernakKu is a livestock guide for small farmers in Indonesia, in Indonesian.
-One screen with three tabs: a searched and filtered FAQ of 15 common
-questions, a shared forum where farmers post questions and replies under a
-nickname typed each time, and a short AI chat (Tanya AI). Answers stay
-general and point to a vet or the dinas peternakan for serious, emergency or
-contagious cases. Farmers often read on a weak-signal phone: keep the page
-light, the text large and the buttons big.
+One screen with four tabs: a searched and filtered FAQ of 15 common
+questions, a personal Ternakku record book for the farmer's own animals, a
+shared forum where farmers post questions and replies under a nickname typed
+each time, and a short AI chat (Tanya AI). Answers stay general and point to
+a vet or the dinas peternakan for serious, emergency or contagious cases.
+Farmers often read on a weak-signal phone: keep the page light, the text
+large and the buttons big.
+
+The Ternakku tab keeps one record per animal: name or ear tag, kind, age,
+photo, weighings from chest-circumference estimates, and notes for daily
+life, sickness and treatment. It turns the care dates into four reminders
+(vaccine, deworming, expected birth, weighing), draws the weight trend,
+shares a plain-text summary to a vet over WhatsApp, and fills the Tanya AI
+box with the selected animal's data. A record belongs to the Homeroom
+account that made it and is never shown to anyone else.
 
 ## Your people's data
 
@@ -113,6 +122,8 @@ covers every table with a `user_id` (or `usernode_pubkey`) column. When
 you add a table that keys a person's rows another way (`author_id`), add it
 to `OWNED_BY`; when a table's `user_id` is not the person the row is
 about, add it to `SKIP`. Keep the file and its mount in `server.js`.
+`animals`, `animal_weights` and `animal_notes` all carry `user_id`, so the
+default covers them (the weights and notes cascade from `animals`).
 
 ## Design
 
@@ -174,6 +185,30 @@ Re-theme by changing the token values there, keeping every text pair at
   empty tile, and never `brand/icon.png`, which the app does not serve.
 
 ## App-specific conventions
+
+- **Ternakku records are private.** `animals`, `animal_weights` and
+  `animal_notes` are marked `staging:private`, are keyed by `user_id`, and
+  every route reads them by the signed-in account. Do not seed demo rows for
+  the viewer: a farmer's animals are personal, so the Ternakku tab starts
+  with its empty state and a tester adds their own. There is no `?demo=1`
+  sample animal.
+- **Reminders are estimates, not a schedule of record.** The four due dates
+  are computed in the page from the animal's care dates and the same general
+  timing as "Alat cepat": vaccine every 6 months (chickens every 4),
+  deworming every 4 months, and weighing every 30 days. The copy always tells
+  the farmer to follow the vet or dinas peternakan, and no drug name or dose
+  is ever shown.
+- **The app reasons in Asia/Jakarta (WIB).** "Today" for a reminder, and the
+  default date of a weighing or note, is the Jakarta day both in the page
+  (`todayIso()`) and on the server (`todayJakarta(req.now)`), so a preview's
+  `?un-now=` moment and the real clock agree.
+- **Weight estimates use the quick tool's own formulas**: Schoorl for cattle
+  ((lingkar dada + 22)² / 100) and Lambourne for goats and sheep
+  (lingkar dada² × panjang badan / 10840). The server computes them, so the
+  chart only holds numbers the formula produced; a chicken's weight is typed
+  from a scale.
+- A Ternakku share sends text only, never the page URL, which carries the
+  viewer's token.
 
 - The 15 FAQ answers live in `public/index.html` as the `FAQ` array: they
   are app content, not stored rows. `warn: true` marks disease/medicine

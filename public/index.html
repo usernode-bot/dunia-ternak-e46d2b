@@ -126,6 +126,75 @@
         </div>
       </main>
 
+      <!-- ── TERNAKKU ─────────────────────────────────────────────────── -->
+      <main id="view-ternakku" class="view" hidden>
+        <div class="hd"><div><b>Ternakku</b><span>Catatan ternakmu</span></div><button type="button" class="info" data-info aria-expanded="false" aria-label="Tentang jawaban di aplikasi ini"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg></button><button type="button" class="btn-primary" id="ternakku-add"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Tambah</button></div>
+        <p class="safety" role="note" hidden>Informasi umum, bukan pengganti dokter hewan. Untuk penyakit menular, hewan darurat, atau obat keras, hubungi dokter hewan atau dinas peternakan.</p>
+
+        <form id="animal-form" class="form-panel" hidden>
+          <div class="form-top">
+            <button type="button" class="ghost" id="animal-cancel">Batal</button>
+            <span class="form-title">Ternak baru</span>
+          </div>
+          <label class="lbl" for="animal-name">Nama atau nomor telinga</label>
+          <input id="animal-name" class="field" maxlength="60" placeholder="mis. Molly atau 0123" required>
+          <label class="lbl" for="animal-kind">Jenis</label>
+          <select id="animal-kind" class="field">
+            <option value="sapi" selected>Sapi</option>
+            <option value="kambing">Kambing</option>
+            <option value="domba">Domba</option>
+            <option value="ayam">Ayam</option>
+          </select>
+          <label class="lbl" for="animal-age">Umur (bulan)</label>
+          <input id="animal-age" class="field" type="number" inputmode="numeric" min="0" max="400" placeholder="mis. 24">
+          <label class="lbl" for="animal-weight">Berat sekarang (kg, tidak wajib)</label>
+          <input id="animal-weight" class="field" type="number" inputmode="decimal" min="0.1" max="2000" step="0.1" placeholder="mis. 250">
+          <div data-photo-control="animal" data-label="Foto ternak (tidak wajib)"></div>
+          <div class="acts">
+            <button type="submit" class="btn-primary" id="animal-submit">Simpan ternak</button>
+          </div>
+          <p class="msg-err" id="animal-err" role="alert" hidden></p>
+        </form>
+
+        <p class="sl" id="ternakku-count" aria-live="polite"></p>
+
+        <ul class="list" id="animal-loading" aria-hidden="true">
+          <li class="list-row"><span class="ic skeleton"></span><div class="m"><div class="skeleton sk-line" style="width:60%"></div><div class="skeleton sk-line sk-short" style="width:40%"></div></div></li>
+          <li class="list-row"><span class="ic skeleton"></span><div class="m"><div class="skeleton sk-line" style="width:75%"></div><div class="skeleton sk-line sk-short" style="width:35%"></div></div></li>
+          <li class="list-row"><span class="ic skeleton"></span><div class="m"><div class="skeleton sk-line" style="width:50%"></div><div class="skeleton sk-line sk-short" style="width:45%"></div></div></li>
+        </ul>
+
+        <ul class="list" id="animal-list" hidden></ul>
+
+        <div class="state-empty" id="animal-empty" hidden>
+          <p><b>Belum ada ternak</b></p>
+          <p>Catat ternakmu supaya berat, pengingat, dan catatan sakitnya tersimpan di satu tempat.</p>
+          <button type="button" class="btn-primary" id="animal-empty-add">Tambah ternak</button>
+        </div>
+
+        <div class="state-error" id="animal-error" hidden>
+          <p><b>Daftar ternak gagal dimuat</b></p>
+          <p>Catatan ternak sedang tidak bisa dihubungi. Tab lain tetap bisa dibuka.</p>
+          <button type="button" class="btn-primary" id="animal-retry">Coba lagi</button>
+        </div>
+      </main>
+
+      <!-- ── SATU TERNAK ──────────────────────────────────────────────── -->
+      <main id="view-animal" class="view" hidden>
+        <div class="hd">
+          <button type="button" class="back" data-act="back" aria-label="Kembali ke daftar ternak"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <div><b id="animal-title">Ternak</b><span id="animal-sub">Memuat catatan...</span></div>
+          <button type="button" class="info" data-info aria-expanded="false" aria-label="Tentang jawaban di aplikasi ini"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg></button>
+        </div>
+        <p class="safety" role="note" hidden>Informasi umum, bukan pengganti dokter hewan. Untuk penyakit menular, hewan darurat, atau obat keras, hubungi dokter hewan atau dinas peternakan.</p>
+        <div id="animal-body"></div>
+        <div class="state-error" id="animal-detail-error" hidden>
+          <p><b>Catatan ternak gagal dimuat</b></p>
+          <p>Periksa koneksi lalu coba lagi. Tab lain tetap bisa dibuka.</p>
+          <button type="button" class="btn-primary" data-act="detail-retry">Coba lagi</button>
+        </div>
+      </main>
+
       <!-- ── FORUM ────────────────────────────────────────────────────── -->
       <main id="view-forum" class="view" hidden>
         <div class="hd"><div><b>Forum</b><span>Tanya dan berbagi sesama peternak</span></div><button type="button" class="info" data-info aria-expanded="false" aria-label="Tentang jawaban di aplikasi ini"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg></button><button type="button" class="btn-primary" id="forum-new"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Tulis</button></div>
@@ -216,6 +285,7 @@
       <div class="foot">
         <div class="tabs" role="tablist" aria-label="Tab aplikasi">
           <button type="button" class="tab on" data-tab="faq" role="tab" aria-selected="true"><span class="pill"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17v.1"/></svg></span>FAQ</button>
+          <button type="button" class="tab" data-tab="ternakku" role="tab" aria-selected="false"><span class="pill"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6M9 9h6M9 13h6M9 17h4"/></svg></span>Ternakku</button>
           <button type="button" class="tab" data-tab="forum" role="tab" aria-selected="false"><span class="pill"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></span>Forum</button>
           <button type="button" class="tab ai" data-tab="ai" role="tab" aria-selected="false"><span class="pill"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg></span>Tanya AI</button>
         </div>
@@ -236,6 +306,13 @@
       var opts = options || {};
       var headers = Object.assign({ 'content-type': 'application/json' }, opts.headers || {});
       if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      // A staging preview opened "as of" a moment tells the server which
+      // moment that is, the same way the platform bridge does.
+      try {
+        if (window.usernode && window.usernode.previewNow && typeof window.usernode.now === 'function') {
+          headers['x-usernode-now'] = window.usernode.now().toISOString();
+        }
+      } catch (e) {}
       return fetch(path, Object.assign({}, opts, { headers: headers }));
     }
 
@@ -253,12 +330,17 @@
       umum: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l8-6 8 6"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg>'
     };
     var ANIMAL = { sapi: 'Sapi', kambing: 'Kambing & Domba', ayam: 'Ayam', umum: 'Umum' };
+    // The animal record names each kind separately; "Kambing & Domba" is the
+    // FAQ/forum filter's grouping, not a kind a farmer picks there.
+    var KIND_NAME = { sapi: 'Sapi', kambing: 'Kambing', domba: 'Domba', ayam: 'Ayam' };
     var CHEV = {
       up: '<svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>',
       down: '<svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
     };
+    var CHEV_NEXT = '<svg class="cv next" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
     var SPARK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>';
     var CAMERA = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+    var SHARE_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M5 14v5h14v-5"/></svg>';
 
     // ── Camera photo (forum and Tanya AI) ──────────────────────────────────
     // The photo is uploaded to the platform's file storage and only its URL
@@ -270,11 +352,13 @@
 
     var postPhoto = { state: 'idle' };
     var aiPhoto = { state: 'idle' };
+    var animalPhoto = { state: 'idle' };
     var replyPhotos = {};
 
     function photoFor(key) {
       if (key === 'post') return postPhoto;
       if (key === 'ai') return aiPhoto;
+      if (key === 'animal') return animalPhoto;
       var id = Number(key.slice('reply-'.length));
       if (!replyPhotos[id]) replyPhotos[id] = { state: 'idle' };
       return replyPhotos[id];
@@ -306,6 +390,8 @@
       });
       var postSubmit = document.getElementById('post-submit');
       if (postSubmit) postSubmit.disabled = postPhoto.state === 'uploading';
+      var animalSubmit = document.getElementById('animal-submit');
+      if (animalSubmit) animalSubmit.disabled = animalPhoto.state === 'uploading';
       if (aiSend) aiSend.disabled = aiBusy || aiPhoto.state === 'uploading';
       document.querySelectorAll('[data-action="reply"]').forEach(function (btn) {
         var st = replyPhotos[Number(btn.getAttribute('data-id'))];
@@ -471,14 +557,34 @@
     }, true);
 
     // ── Tabs ───────────────────────────────────────────────────────────────
-    var TABS = ['faq', 'forum', 'ai'];
-    var views = { faq: document.getElementById('view-faq'), forum: document.getElementById('view-forum'), ai: document.getElementById('view-ai') };
+    var TABS = ['faq', 'ternakku', 'forum', 'ai'];
+    var views = {
+      faq: document.getElementById('view-faq'),
+      ternakku: document.getElementById('view-ternakku'),
+      forum: document.getElementById('view-forum'),
+      ai: document.getElementById('view-ai'),
+      animal: document.getElementById('view-animal')
+    };
     var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.tab'));
     var forumLoaded = false;
 
     function showTab(name) {
-      if (TABS.indexOf(name) < 0) name = 'faq';
+      // "#ternakku/<id>" opens one animal's record; the tab itself is
+      // "ternakku", and the record is a view of its own (with its own
+      // header and safety note).
+      name = name || '';
+      var one = /^ternakku\/(\d+)$/.exec(name);
+      var animalId = one ? Number(one[1]) : null;
+      if (one) name = 'ternakku';
+      if (TABS.indexOf(name) < 0) {
+        name = 'faq';
+        animalId = null;
+      }
       TABS.forEach(function (t) { views[t].hidden = t !== name; });
+      // One animal's record replaces the list; the Ternakku tab is still the
+      // active tab.
+      if (name === 'ternakku' && animalId !== null) views.ternakku.hidden = true;
+      views.animal.hidden = !(name === 'ternakku' && animalId !== null);
       tabButtons.forEach(function (b) {
         var on = b.getAttribute('data-tab') === name;
         b.classList.toggle('on', on);
@@ -487,6 +593,10 @@
       window.scrollTo(0, 0);
       if (name === 'forum' && !forumLoaded) loadPosts();
       if (name === 'ai') { renderChat(); }
+      if (name === 'ternakku') {
+        if (animalId !== null) showAnimal(animalId);
+        else if (!animalsLoaded && !animalsLoading) loadAnimals();
+      }
     }
 
     function goTab(name) {
@@ -1318,6 +1428,738 @@
       aiMsgs.push({ role: 'user', content: text });
       aiInput.value = '';
       askAI(false);
+    });
+
+    // ── Ternakku ───────────────────────────────────────────────────────────
+    // A person's own animals, their weights and their health notes. The
+    // server returns only rows belonging to the signed-in account, so this
+    // screen never shows another farmer's records.
+    var KIND_ICON = { sapi: 'sapi', kambing: 'kambing', domba: 'kambing', ayam: 'ayam' };
+    var NOTE_LABEL = { harian: 'Catatan harian', sakit: 'Sakit', obat: 'Pengobatan' };
+    // Timing only, like the "Alat cepat" schedule: a general interval, never
+    // a drug name or a dose. Farmers follow their vet or dinas peternakan.
+    var CARE_DAYS = {
+      sapi: { vaccine: 180, deworm: 120 },
+      kambing: { vaccine: 180, deworm: 120 },
+      domba: { vaccine: 180, deworm: 120 },
+      ayam: { vaccine: 120, deworm: 120 }
+    };
+    var WEIGH_DAYS = 30;
+    var JAKARTA_DAY = null;
+    try {
+      JAKARTA_DAY = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit'
+      });
+    } catch (e) {}
+
+    var animals = [];
+    var animalsLoaded = false;
+    var animalsLoading = false;
+    var currentAnimal = null;
+    var animalPanels = {};
+    var animalListEl = document.getElementById('animal-list');
+    var animalLoadingEl = document.getElementById('animal-loading');
+    var animalEmptyEl = document.getElementById('animal-empty');
+    var animalErrorEl = document.getElementById('animal-error');
+    var animalForm = document.getElementById('animal-form');
+    var animalErr = document.getElementById('animal-err');
+    var ternakkuAdd = document.getElementById('ternakku-add');
+    var ternakkuCount = document.getElementById('ternakku-count');
+    var animalBody = document.getElementById('animal-body');
+    var animalDetailError = document.getElementById('animal-detail-error');
+    var animalTitle = document.getElementById('animal-title');
+    var animalSub = document.getElementById('animal-sub');
+
+    function kindName(kind) { return KIND_NAME[kind] || 'Ternak'; }
+    function kindClass(kind) { return KIND_ICON[kind] || 'umum'; }
+    function kindIcon(kind) { return ICONS[KIND_ICON[kind] || 'umum']; }
+    function noteKindLabel(kind) { return NOTE_LABEL[kind] || 'Catatan'; }
+    function round1(value) { return Math.round(Number(value) * 10) / 10; }
+    function pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+    function nowDate() {
+      try {
+        if (window.usernode && typeof window.usernode.now === 'function') {
+          var d = window.usernode.now();
+          if (d instanceof Date && !isNaN(d.getTime())) return d;
+        }
+      } catch (e) {}
+      return new Date();
+    }
+
+    // The farmer's own day. Reminders count days in Asia/Jakarta (WIB), the
+    // zone the server also uses, so a preview's chosen moment and the real
+    // clock agree no matter which device opens the app.
+    function todayIso() {
+      var now = nowDate();
+      if (!JAKARTA_DAY) {
+        return now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
+      }
+      var parts = {};
+      JAKARTA_DAY.formatToParts(now).forEach(function (p) { parts[p.type] = p.value; });
+      return parts.year + '-' + parts.month + '-' + parts.day;
+    }
+
+    function dayAdd(iso, days) {
+      return new Date(Date.parse(iso + 'T00:00:00Z') + days * 86400000).toISOString().slice(0, 10);
+    }
+    function dayDiff(fromIso, toIso) {
+      return Math.round((Date.parse(toIso + 'T00:00:00Z') - Date.parse(fromIso + 'T00:00:00Z')) / 86400000);
+    }
+    function fmtDay(iso, withYear) {
+      if (!iso) return '';
+      var opts = { timeZone: 'UTC', day: 'numeric', month: 'long' };
+      if (withYear) opts.year = 'numeric';
+      return new Date(iso + 'T00:00:00Z').toLocaleDateString('id-ID', opts);
+    }
+    function ageLabel(months) {
+      if (months === null || months === undefined || months === '') return '';
+      var m = Number(months);
+      if (!isFinite(m)) return '';
+      if (m < 12) return m + ' bulan';
+      var years = Math.floor(m / 12);
+      var rest = m % 12;
+      return years + ' tahun' + (rest ? ' ' + rest + ' bulan' : '');
+    }
+
+    // The four due dates, derived from the animal's care dates using the
+    // same gestation figures and general intervals as "Alat cepat".
+    function reminderRows(a) {
+      var today = todayIso();
+      var care = CARE_DAYS[a.kind] || CARE_DAYS.sapi;
+      var rows = [];
+      function push(key, title, due) {
+        if (!due) {
+          rows.push({ key: key, title: title, due: '', status: 'none', text: 'Belum dicatat' });
+          return;
+        }
+        var diff = dayDiff(today, due);
+        rows.push({
+          key: key, title: title, due: due,
+          status: diff < 0 ? 'late' : diff === 0 ? 'today' : 'soon',
+          text: diff < 0 ? 'Terlambat ' + (-diff) + ' hari' : diff === 0 ? 'Hari ini' : diff + ' hari lagi'
+        });
+      }
+      push('vaccine', 'Vaksin', a.last_vaccine_on ? dayAdd(a.last_vaccine_on, care.vaccine) : null);
+      push('deworm', 'Obat cacing', a.last_deworm_on ? dayAdd(a.last_deworm_on, care.deworm) : null);
+      if (GESTATION[a.kind]) {
+        push('birth', 'Perkiraan lahir', a.mated_on ? dayAdd(a.mated_on, GESTATION[a.kind].days) : null);
+      }
+      push('weigh', 'Jadwal timbang', a.latest_weighed_on ? dayAdd(a.latest_weighed_on, WEIGH_DAYS) : null);
+      return rows;
+    }
+
+    function animalSummary(a) {
+      var bits = [kindName(a.kind)];
+      var age = ageLabel(a.age_months);
+      if (age) bits.push(age);
+      if (a.latest_weight_kg != null) bits.push(Math.round(a.latest_weight_kg) + ' kg');
+      return bits.join(' · ');
+    }
+
+    function dueSummary(a) {
+      var rows = reminderRows(a);
+      var late = rows.filter(function (r) { return r.status === 'late'; }).length;
+      if (late) return late + ' pengingat terlambat';
+      if (rows.some(function (r) { return r.status === 'today'; })) return 'Ada jadwal hari ini';
+      return '';
+    }
+
+    function renderAnimals() {
+      animalLoadingEl.hidden = true;
+      animalErrorEl.hidden = true;
+      animalListEl.hidden = animals.length === 0;
+      animalEmptyEl.hidden = animals.length !== 0 || !animalForm.hidden;
+      ternakkuAdd.hidden = animals.length === 0 || !animalForm.hidden;
+      ternakkuCount.textContent = animals.length ? animals.length + ' ternak' : '';
+      animalListEl.innerHTML = animals.map(function (a) {
+        var due = dueSummary(a);
+        return '<li class="list-row animal-li">' +
+          '<button type="button" class="animal-btn" data-animal-row="' + a.id + '">' +
+            '<span class="ic ' + kindClass(a.kind) + '">' + kindIcon(a.kind) + '</span>' +
+            '<span class="m">' +
+              '<span class="t">' + esc(a.name) + '</span>' +
+              '<span class="meta">' + esc(animalSummary(a)) + '</span>' +
+              (due ? '<span class="meta meta-due">' + esc(due) + '</span>' : '') +
+            '</span>' + CHEV_NEXT +
+          '</button></li>';
+      }).join('');
+    }
+
+    async function loadAnimals() {
+      animalsLoaded = false;
+      animalsLoading = true;
+      animalLoadingEl.hidden = false;
+      animalListEl.hidden = true;
+      animalEmptyEl.hidden = true;
+      animalErrorEl.hidden = true;
+      ternakkuAdd.hidden = true;
+      try {
+        var res = await api('/api/animals');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var data = await res.json();
+        animals = Array.isArray(data.animals) ? data.animals : [];
+        animalsLoaded = true;
+        renderAnimals();
+      } catch (err) {
+        animalLoadingEl.hidden = true;
+        animalErrorEl.hidden = false;
+      } finally {
+        animalsLoading = false;
+      }
+    }
+
+    function setAnimalError(message) {
+      animalErr.textContent = message;
+      animalErr.hidden = false;
+    }
+
+    function openAnimalForm() {
+      animalForm.hidden = false;
+      animalErr.hidden = true;
+      animalEmptyEl.hidden = true;
+      ternakkuAdd.hidden = true;
+      document.getElementById('animal-name').focus();
+    }
+
+    function closeAnimalForm() {
+      animalForm.hidden = true;
+      animalErr.hidden = true;
+      if (animalsLoaded) renderAnimals();
+      else ternakkuAdd.hidden = false;
+      if (animalPhoto.state !== 'idle') resetPhoto('animal', true);
+    }
+
+    ternakkuAdd.addEventListener('click', openAnimalForm);
+    document.getElementById('animal-empty-add').addEventListener('click', openAnimalForm);
+    document.getElementById('animal-cancel').addEventListener('click', closeAnimalForm);
+    document.getElementById('animal-retry').addEventListener('click', loadAnimals);
+    animalListEl.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('[data-animal-row]');
+      if (btn) location.hash = 'ternakku/' + btn.getAttribute('data-animal-row');
+    });
+
+    animalForm.addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      var payload = {
+        name: document.getElementById('animal-name').value.trim(),
+        kind: document.getElementById('animal-kind').value
+      };
+      var age = document.getElementById('animal-age').value;
+      if (age !== '') payload.age_months = Number(age);
+      var weight = document.getElementById('animal-weight').value;
+      if (weight !== '') payload.weight_kg = Number(weight);
+      Object.assign(payload, photoPayload('animal'));
+      if (!payload.name) { setAnimalError('Isi nama atau nomor telinga.'); return; }
+      var submit = document.getElementById('animal-submit');
+      submit.disabled = true;
+      try {
+        var res = await api('/api/animals', { method: 'POST', body: JSON.stringify(payload) });
+        if (res.status === 401) {
+          setAnimalError('Kamu perlu akun Homeroom untuk mencatat ternak.');
+          return;
+        }
+        var data = await res.json().catch(function () { return {}; });
+        if (!res.ok || !data.id) {
+          setAnimalError('Ternak gagal disimpan. Periksa isian lalu coba lagi.');
+          return;
+        }
+        animalForm.reset();
+        resetPhoto('animal', false);
+        animalsLoaded = false;
+        animals = [];
+        closeAnimalForm();
+        await loadAnimals();
+        location.hash = 'ternakku/' + data.id;
+      } catch (err) {
+        setAnimalError('Ternak gagal disimpan. Periksa koneksi lalu coba lagi.');
+      } finally {
+        submit.disabled = false;
+      }
+    });
+
+    // ── One animal's record ────────────────────────────────────────────────
+    function animalSkeleton() {
+      return '<div class="animal-head"><span class="photo-thumb skeleton"></span><div class="m">' +
+          '<div class="skeleton sk-line" style="width:55%"></div>' +
+          '<div class="skeleton sk-line sk-short" style="width:35%"></div></div></div>' +
+        '<ul class="list" aria-hidden="true">' +
+          '<li class="list-row"><span class="ic skeleton"></span><div class="m"><div class="skeleton sk-line" style="width:60%"></div></div></li>' +
+          '<li class="list-row"><span class="ic skeleton"></span><div class="m"><div class="skeleton sk-line" style="width:45%"></div></div></li>' +
+          '<li class="list-row"><span class="ic skeleton"></span><div class="m"><div class="skeleton sk-line" style="width:70%"></div></div></li>' +
+        '</ul>';
+    }
+
+    async function showAnimal(id) {
+      currentAnimal = null;
+      animalBody.hidden = false;
+      animalDetailError.hidden = true;
+      animalTitle.textContent = 'Ternak';
+      animalSub.textContent = 'Memuat catatan...';
+      animalBody.innerHTML = animalSkeleton();
+      try {
+        var res = await api('/api/animals/' + id);
+        if (res.status === 404) {
+          animalTitle.textContent = 'Ternak tidak ditemukan';
+          animalSub.textContent = '';
+          animalBody.innerHTML = '<div class="state-empty"><p><b>Ternak tidak ditemukan</b></p>' +
+            '<p>Catatan ini mungkin sudah dihapus.</p>' +
+            '<button type="button" class="btn-primary" data-act="back">Kembali ke Ternakku</button></div>';
+          return;
+        }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var data = await res.json();
+        currentAnimal = data.animal;
+        renderAnimal();
+      } catch (err) {
+        animalBody.hidden = true;
+        animalDetailError.hidden = false;
+      }
+    }
+
+    function careFormHtml(a) {
+      var today = todayIso();
+      var kawin = GESTATION[a.kind]
+        ? '<label class="lbl" for="care-kawin">Tanggal kawin</label>' +
+          '<input id="care-kawin" class="field" type="date" value="' + esc(a.mated_on || '') + '" max="' + today + '">'
+        : '';
+      return '<div class="form-top"><button type="button" class="ghost" data-act="care-close">Tutup</button>' +
+          '<span class="form-title">Tanggal perawatan</span></div>' +
+        kawin +
+        '<label class="lbl" for="care-vaccine">Vaksin terakhir</label>' +
+        '<input id="care-vaccine" class="field" type="date" value="' + esc(a.last_vaccine_on || '') + '" max="' + today + '">' +
+        '<label class="lbl" for="care-deworm">Obat cacing terakhir</label>' +
+        '<input id="care-deworm" class="field" type="date" value="' + esc(a.last_deworm_on || '') + '" max="' + today + '">' +
+        '<div class="acts"><button type="submit" class="btn-primary">Simpan tanggal</button></div>' +
+        '<p class="msg-err" role="alert" data-form-err hidden></p>';
+    }
+
+    function weighFormHtml(a) {
+      var today = todayIso();
+      var fields;
+      var note;
+      if (a.kind === 'ayam') {
+        fields = '<label class="lbl" for="weigh-value">Berat (kg)</label>' +
+          '<input id="weigh-value" class="field" type="number" inputmode="decimal" min="0.1" max="20" step="0.1" placeholder="mis. 1.8" required>';
+        note = 'Tulis berat dari timbangan bila ada.';
+      } else {
+        fields = '<label class="lbl" for="weigh-value">Lingkar dada (cm)</label>' +
+          '<input id="weigh-value" class="field" type="number" inputmode="numeric" min="40" max="250" placeholder="mis. 150" required>';
+        if (a.kind !== 'sapi') {
+          fields += '<label class="lbl" for="weigh-length">Panjang badan (cm)</label>' +
+            '<input id="weigh-length" class="field" type="number" inputmode="numeric" min="20" max="200" placeholder="mis. 60" required>';
+        }
+        note = 'Berat diperkirakan dari lingkar dada' + (a.kind === 'sapi' ? '' : ' dan panjang badan') +
+          ', dengan rumus yang sama seperti Alat cepat.';
+      }
+      return '<div class="form-top"><button type="button" class="ghost" data-act="weigh-close">Tutup</button>' +
+          '<span class="form-title">Tambah timbang</span></div>' +
+        '<label class="lbl" for="weigh-date">Tanggal</label>' +
+        '<input id="weigh-date" class="field" type="date" value="' + today + '" max="' + today + '">' +
+        fields +
+        '<p class="note-thin">' + note + '</p>' +
+        '<div class="acts"><button type="submit" class="btn-primary">Simpan berat</button></div>' +
+        '<p class="msg-err" role="alert" data-form-err hidden></p>';
+    }
+
+    function noteFormHtml() {
+      var today = todayIso();
+      return '<div class="form-top"><button type="button" class="ghost" data-act="note-close">Tutup</button>' +
+          '<span class="form-title">Catatan baru</span></div>' +
+        '<label class="lbl" for="note-kind">Jenis catatan</label>' +
+        '<select id="note-kind" class="field">' +
+          '<option value="harian">Catatan harian</option>' +
+          '<option value="sakit">Sakit</option>' +
+          '<option value="obat">Pengobatan</option>' +
+        '</select>' +
+        '<label class="lbl" for="note-date">Tanggal</label>' +
+        '<input id="note-date" class="field" type="date" value="' + today + '" max="' + today + '">' +
+        '<label class="lbl" for="note-body">Catatan</label>' +
+        '<textarea id="note-body" class="field ta" maxlength="2000" placeholder="mis. Nafsu makan turun sejak pagi" required></textarea>' +
+        '<div class="acts"><button type="submit" class="btn-primary">Simpan catatan</button></div>' +
+        '<p class="msg-err" role="alert" data-form-err hidden></p>';
+    }
+
+    // A single-series line chart, drawn from the weights the server stored.
+    // One axis, a 2px line, dots big enough to tap, and the values also
+    // readable in the list underneath.
+    function chartHtml(weights) {
+      var W = 320;
+      var H = 150;
+      var padL = 42;
+      var padR = 10;
+      var padT = 12;
+      var padB = 26;
+      var pts = weights.map(function (w) {
+        return { d: w.weighed_on, kg: Number(w.weight_kg) };
+      });
+      var days = pts.map(function (p) { return Date.parse(p.d + 'T00:00:00Z') / 86400000; });
+      var minD = Math.min.apply(null, days);
+      var maxD = Math.max.apply(null, days);
+      var kgs = pts.map(function (p) { return p.kg; });
+      var minKg = Math.min.apply(null, kgs);
+      var maxKg = Math.max.apply(null, kgs);
+      if (maxKg === minKg) { minKg -= 1; maxKg += 1; }
+      var pad = (maxKg - minKg) * 0.15;
+      minKg = Math.max(0, minKg - pad);
+      maxKg = maxKg + pad;
+      function px(day, i) {
+        // Two weighings on one day have no time axis to spread along, so
+        // space the points evenly instead of stacking them on one x.
+        if (maxD === minD) {
+          if (pts.length === 1) return padL + (W - padL - padR) / 2;
+          return padL + i * (W - padL - padR) / (pts.length - 1);
+        }
+        return padL + (day - minD) / (maxD - minD) * (W - padL - padR);
+      }
+      function py(kg) {
+        return padT + (maxKg - kg) / (maxKg - minKg) * (H - padT - padB);
+      }
+      var coords = pts.map(function (p, i) {
+        return { x: px(days[i], i), y: py(p.kg), kg: p.kg, d: p.d };
+      });
+      var line = coords.map(function (c, i) {
+        return (i ? 'L' : 'M') + c.x.toFixed(1) + ' ' + c.y.toFixed(1);
+      }).join(' ');
+      var last = coords[coords.length - 1];
+      var first = coords[0];
+      var base = H - padB;
+      var area = line + ' L' + last.x.toFixed(1) + ' ' + base + ' L' + first.x.toFixed(1) + ' ' + base + ' Z';
+      var grid = [0, 0.5, 1].map(function (t) {
+        var kg = maxKg - t * (maxKg - minKg);
+        var yy = padT + t * (H - padT - padB);
+        return '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + yy.toFixed(1) + '" y2="' + yy.toFixed(1) + '" class="chart-grid"/>' +
+          '<text x="' + (padL - 6) + '" y="' + (yy + 4).toFixed(1) + '" text-anchor="end" class="chart-axis">' + Math.round(kg) + '</text>';
+      }).join('');
+      var dots = coords.map(function (c) {
+        return '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="5" class="chart-dot">' +
+          '<title>' + esc(fmtDay(c.d, true) + ': ' + round1(c.kg) + ' kg') + '</title></circle>';
+      }).join('');
+      var xlabels =
+        '<text x="' + padL + '" y="' + (H - 8) + '" text-anchor="start" class="chart-axis">' + esc(fmtDay(first.d, false)) + '</text>' +
+        '<text x="' + (W - padR) + '" y="' + (H - 8) + '" text-anchor="end" class="chart-axis">' + esc(fmtDay(last.d, false)) + '</text>';
+      var label = coords.map(function (c) { return fmtDay(c.d, false) + ' ' + round1(c.kg) + ' kg'; }).join(', ');
+      return '<div class="chart-wrap"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Grafik berat badan: ' + esc(label) + '">' +
+        grid +
+        '<path d="' + area + '" class="chart-area"/>' +
+        '<path d="' + line + '" class="chart-line"/>' +
+        dots + xlabels +
+      '</svg></div>';
+    }
+
+    function renderAnimal() {
+      var a = currentAnimal;
+      if (!a) return;
+      animalTitle.textContent = a.name;
+      animalSub.textContent = 'Catatan ternak';
+      animalBody.hidden = false;
+      animalDetailError.hidden = true;
+
+      var weights = a.weights || [];
+      var notes = a.notes || [];
+      var latest = weights.length ? weights[weights.length - 1] : null;
+      var reminders = reminderRows(a);
+      var age = ageLabel(a.age_months);
+      var photo = a.photo_url
+        ? '<img class="photo-thumb photo-img" src="' + esc(a.photo_url) + '" alt="Foto ' + esc(a.name) + '" loading="lazy" decoding="async">'
+        : '<span class="ic ' + kindClass(a.kind) + '">' + kindIcon(a.kind) + '</span>';
+
+      var reminderHtml = reminders.map(function (r) {
+        var act = '';
+        if (r.key === 'vaccine' || r.key === 'deworm') {
+          act = '<button type="button" class="ghost inline" data-act="today-' + r.key + '">Catat hari ini</button>';
+        }
+        return '<li class="list-row reminder">' +
+          '<span class="m">' +
+            '<span class="t">' + esc(r.title) + '</span>' +
+            '<span class="meta">' + (r.due ? 'Jadwal ' + esc(fmtDay(r.due, true)) : 'Belum ada tanggal') + '</span>' +
+            act +
+          '</span>' +
+          '<span class="due-badge ' + r.status + '">' + esc(r.text) + '</span>' +
+        '</li>';
+      }).join('');
+
+      var weightList = weights.slice().reverse().slice(0, 8).map(function (w) {
+        var meta = fmtDay(w.weighed_on, true);
+        if (w.chest_cm) meta += ' · lingkar dada ' + w.chest_cm + ' cm';
+        return '<li class="list-row"><span class="m"><span class="t">' + esc(round1(w.weight_kg)) + ' kg</span>' +
+          '<span class="meta">' + esc(meta) + '</span></span></li>';
+      }).join('');
+
+      var noteList = notes.map(function (n) {
+        return '<li class="list-row note-row"><span class="m">' +
+          '<span class="note-meta"><span class="tag-note ' + esc(n.kind) + '">' + esc(noteKindLabel(n.kind)) + '</span>' +
+          '<span>' + esc(fmtDay(n.note_date, true)) + '</span></span>' +
+          '<span class="body">' + esc(n.body) + '</span>' +
+        '</span></li>';
+      }).join('');
+
+      var html = '';
+      html += '<div class="animal-head">' + photo + '<div class="m">' +
+        '<p class="animal-kind">' + esc(kindName(a.kind)) + '</p>' +
+        '<p class="meta">' + (age ? 'Umur ' + esc(age) : 'Umur belum diisi') +
+          (latest ? ' · Berat terakhir ' + esc(round1(latest.weight_kg)) + ' kg' : '') + '</p>' +
+      '</div></div>';
+      html += '<div class="acts">' +
+        '<button type="button" class="btn-secondary" data-act="ai">' + SPARK + 'Tanya AI</button>' +
+        '<button type="button" class="btn-secondary" data-act="share">' + SHARE_ICON + 'Bagikan ke WhatsApp</button>' +
+      '</div><p class="msg" role="status" data-share-status hidden></p>';
+
+      html += '<p class="sl">Pengingat</p><ul class="list">' + reminderHtml + '</ul>';
+      html += '<p class="note-thin reminder-note">Perkiraan dari jadwal umum. Ikuti jadwal petugas atau dinas peternakan setempat.</p>';
+      html += '<button type="button" class="ghost" data-act="care-form">Atur tanggal vaksin, cacing, kawin</button>';
+      html += '<form class="form-panel" data-form="care"' + (animalPanels.care ? '' : ' hidden') + '>' + careFormHtml(a) + '</form>';
+
+      html += '<p class="sl">Berat badan</p>';
+      if (latest) {
+        html += '<div class="weight-hero"><b>' + esc(round1(latest.weight_kg)) + ' kg</b>' +
+          '<span>Berat terakhir, ' + esc(fmtDay(latest.weighed_on, true)) + '</span></div>';
+        if (weights.length >= 2) html += chartHtml(weights);
+        else html += '<p class="note-thin">Grafik muncul setelah ada dua catatan timbang.</p>';
+      }
+      // One way to add at a time: the empty state's button when there is
+      // nothing yet, the section's own button once there are rows, and
+      // neither while the form is open.
+      if (weights.length && !animalPanels.weigh) {
+        html += '<div class="acts"><button type="button" class="btn-secondary" data-act="weigh-form">Tambah timbang</button></div>';
+      }
+      html += '<form class="form-panel" data-form="weigh"' + (animalPanels.weigh ? '' : ' hidden') + '>' + weighFormHtml(a) + '</form>';
+      if (weights.length) {
+        html += '<ul class="list">' + weightList + '</ul>';
+      } else if (!animalPanels.weigh) {
+        html += '<div class="state-empty"><p><b>Belum ada catatan berat</b></p>' +
+          '<p>Timbang atau ukur lingkar dada ternak untuk melihat pertumbuhannya.</p>' +
+          '<button type="button" class="btn-primary" data-act="weigh-form">Tambah timbang</button></div>';
+      }
+
+      html += '<p class="sl">Catatan</p>';
+      if (notes.length && !animalPanels.note) {
+        html += '<div class="acts"><button type="button" class="btn-secondary" data-act="note-form">Tambah catatan</button></div>';
+      }
+      html += '<form class="form-panel" data-form="note"' + (animalPanels.note ? '' : ' hidden') + '>' + noteFormHtml() + '</form>';
+      if (notes.length) {
+        html += '<ul class="list note-list">' + noteList + '</ul>';
+      } else if (!animalPanels.note) {
+        html += '<div class="state-empty"><p><b>Belum ada catatan</b></p>' +
+          '<p>Tulis catatan harian, sakit, atau pengobatan supaya tidak lupa.</p>' +
+          '<button type="button" class="btn-primary" data-act="note-form">Tambah catatan</button></div>';
+      }
+
+      html += '<div class="acts animal-danger"><button type="button" class="ghost danger-text" data-act="delete">Hapus ternak</button></div>';
+      animalBody.innerHTML = html;
+    }
+
+    function focusFirst(selector) {
+      var el = animalBody.querySelector(selector);
+      if (el) el.focus();
+    }
+
+    function animalStatus(message) {
+      var el = animalBody.querySelector('[data-share-status]');
+      if (el) { el.textContent = message; el.hidden = false; }
+    }
+
+    function formError(form, message) {
+      var el = form.querySelector('[data-form-err]');
+      if (el) { el.textContent = message; el.hidden = false; }
+    }
+
+    // The share text is text only: the page URL inside the frame carries the
+    // viewer's token, so it is never sent to WhatsApp.
+    function animalShareText(a) {
+      var lines = ['Catatan ternak TernakKu', '', 'Nama: ' + a.name, 'Jenis: ' + kindName(a.kind)];
+      var age = ageLabel(a.age_months);
+      if (age) lines.push('Umur: ' + age);
+      if (a.latest_weight_kg != null) {
+        lines.push('Berat terakhir: ' + round1(a.latest_weight_kg) + ' kg (' + fmtDay(a.latest_weighed_on, true) + ')');
+      }
+      var reminders = reminderRows(a).filter(function (r) { return r.due; });
+      if (reminders.length) {
+        lines.push('Pengingat: ' + reminders.map(function (r) {
+          return r.title + ' ' + r.text.toLowerCase();
+        }).join('; '));
+      }
+      var recent = (a.notes || []).slice(0, 3);
+      if (recent.length) {
+        lines.push('', 'Catatan terakhir:');
+        recent.forEach(function (n) {
+          lines.push('- ' + fmtDay(n.note_date, true) + ' (' + noteKindLabel(n.kind) + '): ' + n.body);
+        });
+      }
+      lines.push('', 'Informasi umum, bukan pengganti dokter hewan.');
+      return lines.join('\n');
+    }
+
+    function shareAnimal() {
+      var text = animalShareText(currentAnimal);
+      var win = null;
+      try { win = window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'); } catch (e) {}
+      if (win) {
+        try { win.opener = null; } catch (e) {}
+        animalStatus('WhatsApp dibuka di tab baru.');
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          animalStatus('Teks catatan tersalin. Tempel di WhatsApp.');
+        }, function () {
+          animalStatus('Gagal membuka WhatsApp. Coba lagi.');
+        });
+        return;
+      }
+      animalStatus('Gagal membuka WhatsApp. Coba lagi.');
+    }
+
+    // "Tanya AI" from a record fills the question with the animal's data, so
+    // the farmer only has to add what they want to ask.
+    function askAiAboutAnimal(a) {
+      var bits = ['Ternak saya: ' + a.name + ', ' + kindName(a.kind).toLowerCase()];
+      var age = ageLabel(a.age_months);
+      if (age) bits.push('umur ' + age);
+      if (a.latest_weight_kg != null) bits.push('berat terakhir sekitar ' + Math.round(a.latest_weight_kg) + ' kg');
+      var text = bits.join(', ') + '.';
+      var latest = (a.notes || [])[0];
+      if (latest) {
+        text += ' Catatan terakhir (' + noteKindLabel(latest.kind) + ', ' + fmtDay(latest.note_date, true) + '): ' + latest.body;
+      }
+      var late = reminderRows(a).filter(function (r) { return r.status === 'late'; });
+      if (late.length) {
+        text += ' Pengingat terlambat: ' + late.map(function (r) { return r.title.toLowerCase(); }).join(', ') + '.';
+      }
+      text += '\n\n';
+      aiInput.value = text;
+      goTab('ai');
+      aiInput.focus();
+      try { aiInput.setSelectionRange(text.length, text.length); } catch (e) {}
+    }
+
+    async function saveCare(form) {
+      var payload = {
+        last_vaccine_on: form.querySelector('#care-vaccine').value,
+        last_deworm_on: form.querySelector('#care-deworm').value
+      };
+      var kawin = form.querySelector('#care-kawin');
+      if (kawin) payload.mated_on = kawin.value;
+      var res;
+      try {
+        res = await api('/api/animals/' + currentAnimal.id, { method: 'PATCH', body: JSON.stringify(payload) });
+      } catch (err) {
+        formError(form, 'Tanggal gagal disimpan. Periksa koneksi lalu coba lagi.');
+        return;
+      }
+      if (!res.ok) { formError(form, 'Tanggal gagal disimpan. Periksa tanggalnya lalu coba lagi.'); return; }
+      animalPanels = {};
+      await showAnimal(currentAnimal.id);
+    }
+
+    async function saveWeigh(form) {
+      var payload = { weighed_on: form.querySelector('#weigh-date').value || todayIso() };
+      if (currentAnimal.kind === 'ayam') {
+        payload.weight_kg = Number(form.querySelector('#weigh-value').value);
+      } else {
+        payload.chest_cm = Number(form.querySelector('#weigh-value').value);
+        var len = form.querySelector('#weigh-length');
+        if (len) payload.body_length_cm = Number(len.value);
+      }
+      var res;
+      try {
+        res = await api('/api/animals/' + currentAnimal.id + '/weights', {
+          method: 'POST', body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        formError(form, 'Berat gagal disimpan. Periksa koneksi lalu coba lagi.');
+        return;
+      }
+      if (!res.ok) { formError(form, 'Berat gagal disimpan. Periksa angkanya lalu coba lagi.'); return; }
+      animalPanels = {};
+      await showAnimal(currentAnimal.id);
+    }
+
+    async function saveNote(form) {
+      var payload = {
+        kind: form.querySelector('#note-kind').value,
+        note_date: form.querySelector('#note-date').value || todayIso(),
+        body: form.querySelector('#note-body').value.trim()
+      };
+      if (!payload.body) { formError(form, 'Tulis isi catatannya dulu.'); return; }
+      var res;
+      try {
+        res = await api('/api/animals/' + currentAnimal.id + '/notes', {
+          method: 'POST', body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        formError(form, 'Catatan gagal disimpan. Periksa koneksi lalu coba lagi.');
+        return;
+      }
+      if (!res.ok) { formError(form, 'Catatan gagal disimpan. Periksa isian lalu coba lagi.'); return; }
+      animalPanels = {};
+      await showAnimal(currentAnimal.id);
+    }
+
+    document.getElementById('view-animal').addEventListener('submit', function (ev) {
+      var form = ev.target.closest('form[data-form]');
+      if (!form) return;
+      ev.preventDefault();
+      var which = form.getAttribute('data-form');
+      if (which === 'care') saveCare(form);
+      if (which === 'weigh') saveWeigh(form);
+      if (which === 'note') saveNote(form);
+    });
+
+    document.getElementById('view-animal').addEventListener('click', async function (ev) {
+      var act = ev.target.closest('[data-act]');
+      if (!act) return;
+      var action = act.getAttribute('data-act');
+      if (action === 'back') { goTab('ternakku'); return; }
+      if (action === 'detail-retry') {
+        var m = /^ternakku\/(\d+)$/.exec(location.hash.replace('#', ''));
+        if (m) showAnimal(Number(m[1]));
+        else goTab('ternakku');
+        return;
+      }
+      if (!currentAnimal) return;
+      if (action === 'ai') { askAiAboutAnimal(currentAnimal); return; }
+      if (action === 'share') { shareAnimal(); return; }
+      if (action === 'today-vaccine' || action === 'today-deworm') {
+        var field = action === 'today-vaccine' ? 'last_vaccine_on' : 'last_deworm_on';
+        var payload = {};
+        payload[field] = todayIso();
+        act.disabled = true;
+        try {
+          var res = await api('/api/animals/' + currentAnimal.id, {
+            method: 'PATCH', body: JSON.stringify(payload)
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          animalPanels = {};
+          await showAnimal(currentAnimal.id);
+        } catch (err) {
+          act.disabled = false;
+          animalStatus('Tanggal gagal disimpan. Coba lagi.');
+        }
+        return;
+      }
+      if (action === 'care-form') { animalPanels = { care: true }; renderAnimal(); focusFirst('[data-form="care"] input'); return; }
+      if (action === 'care-close') { animalPanels = {}; renderAnimal(); return; }
+      if (action === 'weigh-form') { animalPanels = { weigh: true }; renderAnimal(); focusFirst('[data-form="weigh"] #weigh-value'); return; }
+      if (action === 'weigh-close') { animalPanels = {}; renderAnimal(); return; }
+      if (action === 'note-form') { animalPanels = { note: true }; renderAnimal(); focusFirst('[data-form="note"] #note-body'); return; }
+      if (action === 'note-close') { animalPanels = {}; renderAnimal(); return; }
+      if (action === 'delete') {
+        if (!confirm('Hapus ternak ini beserta semua catatannya?')) return;
+        act.disabled = true;
+        try {
+          var del = await api('/api/animals/' + currentAnimal.id, { method: 'DELETE' });
+          if (!del.ok) throw new Error('HTTP ' + del.status);
+          deleteUpload(currentAnimal.photo_id);
+          currentAnimal = null;
+          animals = [];
+          animalsLoaded = false;
+          location.hash = 'ternakku';
+        } catch (err) {
+          act.disabled = false;
+          animalStatus('Ternak gagal dihapus. Coba lagi.');
+        }
+      }
     });
 
     // ── Boot ───────────────────────────────────────────────────────────────
