@@ -102,21 +102,37 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
           <input id="faq-search" class="field" type="search" placeholder="Cari, mis. kembung" aria-label="Cari pertanyaan">
         </div>
-        <div class="chips" id="faq-chips" role="group" aria-label="Saring pertanyaan per hewan">
-          <button type="button" class="chip on" data-cat="semua" aria-pressed="true">Semua</button>
-          <button type="button" class="chip" data-cat="sapi" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7C4 7 3 5 3 3M17 7c3 0 4-2 4-4"/><path d="M7 6h10v7H7z"/><rect x="8" y="13" width="8" height="7" rx="2"/></svg>Sapi</button>
-          <button type="button" class="chip" data-cat="kambing" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6C8 4 6 3 4 4M15 6c1-2 3-3 5-2"/><path d="M9 6h6l-1 9h-4z"/><path d="M11 15l1 5 1-5"/></svg>Kambing &amp; Domba</button>
-          <button type="button" class="chip" data-cat="ayam" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8c0-2 1.5-3 2.5-2 .2-2 2.5-2 2.8 0 1-1 2.4-.2 2.4 1.7"/><circle cx="11" cy="13" r="6"/><path d="M17 11l4 2-4 2"/></svg>Ayam</button>
-          <button type="button" class="chip" data-cat="umum" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l8-6 8 6"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg>Umum</button>
+        <div class="filters-wrap" data-at-end="true">
+          <div class="filters" id="faq-chips" role="group" aria-label="Saring pertanyaan per hewan"></div>
+          <div class="filter-track" aria-hidden="true" hidden><span class="filter-thumb"></span></div>
         </div>
         <div id="tools">
           <p class="sl">Alat cepat</p>
           <div class="tools" role="group" aria-label="Alat cepat">
-            <button type="button" class="tool" data-tool="lahiran" aria-expanded="false">Perkiraan lahiran<small>dari tanggal kawin</small></button>
-            <button type="button" class="tool" data-tool="jadwal" aria-expanded="false">Jadwal vaksin &amp; cacing<small>panduan umum</small></button>
-            <button type="button" class="tool" data-tool="berat" aria-expanded="false">Estimasi berat<small>dari lingkar dada</small></button>
+            <button type="button" class="tool" data-tool="lahiran" aria-expanded="false">
+              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 15h6"/></svg></span>
+              <span class="tool-title">Tanggal lahir</span>
+              <span class="tool-desc">dari tanggal kawin</span>
+            </button>
+            <button type="button" class="tool" data-tool="jadwal" aria-expanded="false">
+              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4l6 6M17 7l-9 9-4 1 1-4 9-9z"/><path d="M5 19l-2 2M12 6l6 6"/></svg></span>
+              <span class="tool-title">Jadwal vaksin</span>
+              <span class="tool-desc">vaksin &amp; obat cacing</span>
+            </button>
+            <button type="button" class="tool" data-tool="berat" aria-expanded="false">
+              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M7 20V9a5 5 0 0 1 10 0v11M12 9l2-3"/></svg></span>
+              <span class="tool-title">Berat badan</span>
+              <span class="tool-desc">dari lingkar dada</span>
+            </button>
           </div>
           <div id="tool-panel" class="form-panel" hidden></div>
+        </div>
+        <div id="tip-card" class="tip-card">
+          <div class="tip-head">
+            <span class="tip-ic" id="tip-ic" aria-hidden="true"></span>
+            <div><p class="tip-kicker">Tips hari ini</p><p class="tip-cat" id="tip-cat"></p></div>
+          </div>
+          <p class="tip-text" id="tip-text" aria-live="polite"></p>
         </div>
         <p class="sl" id="faq-count" aria-live="polite"></p>
         <div id="faq-list" class="faq-cards"></div>
@@ -225,12 +241,9 @@
           <p class="msg-err" id="post-err" role="alert" hidden></p>
         </form>
 
-        <div class="chips" id="forum-chips" role="group" aria-label="Saring pertanyaan forum per hewan">
-          <button type="button" class="chip on" data-cat="semua" aria-pressed="true">Semua</button>
-          <button type="button" class="chip" data-cat="sapi" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7C4 7 3 5 3 3M17 7c3 0 4-2 4-4"/><path d="M7 6h10v7H7z"/><rect x="8" y="13" width="8" height="7" rx="2"/></svg>Sapi</button>
-          <button type="button" class="chip" data-cat="kambing" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6C8 4 6 3 4 4M15 6c1-2 3-3 5-2"/><path d="M9 6h6l-1 9h-4z"/><path d="M11 15l1 5 1-5"/></svg>Kambing &amp; Domba</button>
-          <button type="button" class="chip" data-cat="ayam" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8c0-2 1.5-3 2.5-2 .2-2 2.5-2 2.8 0 1-1 2.4-.2 2.4 1.7"/><circle cx="11" cy="13" r="6"/><path d="M17 11l4 2-4 2"/></svg>Ayam</button>
-          <button type="button" class="chip" data-cat="umum" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l8-6 8 6"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg>Umum</button>
+        <div class="filters-wrap" data-at-end="true">
+          <div class="filters" id="forum-chips" role="group" aria-label="Saring pertanyaan forum per hewan"></div>
+          <div class="filter-track" aria-hidden="true" hidden><span class="filter-thumb"></span></div>
         </div>
 
         <p class="sl" id="forum-name">Pertanyaan terbaru</p>
@@ -333,6 +346,25 @@
     // The animal record names each kind separately; "Kambing & Domba" is the
     // FAQ/forum filter's grouping, not a kind a farmer picks there.
     var KIND_NAME = { sapi: 'Sapi', kambing: 'Kambing', domba: 'Domba', ayam: 'Ayam' };
+    // The filter row and the tool cards use the same line drawings as the
+    // animal markers, with one extra "all" mark and three tool marks.
+    var FILTER_ALL = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>';
+    var FILTERS = [
+      { cat: 'semua', label: 'Semua', icon: FILTER_ALL },
+      { cat: 'sapi', label: ANIMAL.sapi, icon: ICONS.sapi },
+      { cat: 'kambing', label: ANIMAL.kambing, icon: ICONS.kambing },
+      { cat: 'ayam', label: ANIMAL.ayam, icon: ICONS.ayam },
+      { cat: 'umum', label: ANIMAL.umum, icon: ICONS.umum }
+    ];
+    var PEOPLE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M16 5a3 3 0 0 1 0 6M17 15c2 0 4 2 4 5"/></svg>';
+    var SHIELD = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>';
+    var TIPS = {
+      sapi: 'Periksa air minum pagi dan sore. Sapi butuh 30–50 liter sehari, lebih saat cuaca panas.',
+      kambing: 'Ganti alas kandang seminggu sekali supaya kuku dan pernapasan kambing tetap sehat.',
+      ayam: 'Buka ventilasi kandang pagi hari agar lantai tidak lembap dan ayam tidak mudah sakit.',
+      umum: 'Catat tanggal vaksin dan obat cacing di buku kandang supaya jadwal berikutnya tidak terlewat.'
+    };
+    var TIP_ORDER = ['sapi', 'kambing', 'ayam', 'umum'];
     var CHEV = {
       up: '<svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>',
       down: '<svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
@@ -567,6 +599,10 @@
     };
     var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.tab'));
     var forumLoaded = false;
+    var currentTab = null;
+    TABS.forEach(function (t) {
+      views[t].addEventListener('animationend', function () { views[t].classList.remove('is-entering'); });
+    });
 
     function showTab(name) {
       // "#ternakku/<id>" opens one animal's record; the tab itself is
@@ -580,6 +616,9 @@
         name = 'faq';
         animalId = null;
       }
+      var first = currentTab === null;
+      var changed = currentTab !== name;
+      currentTab = name;
       TABS.forEach(function (t) { views[t].hidden = t !== name; });
       // One animal's record replaces the list; the Ternakku tab is still the
       // active tab.
@@ -591,7 +630,17 @@
         b.setAttribute('aria-selected', on ? 'true' : 'false');
       });
       window.scrollTo(0, 0);
+      if (changed && !first) {
+        var view = views[name];
+        view.classList.remove('is-entering');
+        void view.offsetWidth;
+        view.classList.add('is-entering');
+        clearTimeout(view.enterTimer);
+        view.enterTimer = setTimeout(function () { view.classList.remove('is-entering'); }, 300);
+      }
       if (name === 'forum' && !forumLoaded) loadPosts();
+      var row = document.getElementById(name + '-chips');
+      if (row) requestAnimationFrame(function () { syncFilterHint(row); });
       if (name === 'ai') { renderChat(); }
       if (name === 'ternakku') {
         if (animalId !== null) showAnimal(animalId);
@@ -610,21 +659,21 @@
 
     // ── FAQ ────────────────────────────────────────────────────────────────
     var FAQ = [
-      { cat: 'sapi', q: 'Berapa lama sapi bunting?', a: 'Sekitar 9 bulan (±280 hari). Pisahkan induk ke kandang tenang menjelang melahirkan dan siapkan alas bersih.' },
-      { cat: 'kambing', q: 'Berapa lama kambing bunting?', a: 'Sekitar 5 bulan (±150 hari). Domba mirip, sekitar 145 sampai 152 hari. Catat tanggal kawin supaya perkiraan lahir tepat.' },
-      { cat: 'sapi', q: 'Apa tanda sapi birahi?', a: 'Gelisah, sering menaiki sapi lain, vulva bengkak dan berlendir bening, serta diam bila ditunggangi. Birahi datang tiap 18 sampai 24 hari; bila lebih lama, periksa ke mantri.' },
-      { cat: 'ayam', q: 'Kapan ayam divaksin ND?', a: 'Umumnya umur 3 sampai 4 hari (tetes mata atau air minum), diulang umur 3 sampai 4 minggu, lalu tiap 3 sampai 4 bulan. Ikuti jadwal petugas atau dinas peternakan setempat.' },
-      { cat: 'ayam', q: 'Berapa hari telur ayam menetas?', a: 'Sekitar 21 hari. Mesin tetas dijaga sekitar 37,5 derajat Celsius dengan kelembapan 55 sampai 60 persen, dan dibalik 3 sampai 4 kali sehari. Telur itik lebih lama, sekitar 28 hari.' },
-      { cat: 'kambing', warn: true, q: 'Kambing kembung, apa yang dilakukan?', a: 'Hentikan pakan beragi dan rumput basah, ajak berjalan pelan, beri air bersih. Kembung yang cepat membesar, sesak, atau hewan tidak mau berdiri adalah darurat: hubungi dokter hewan segera.' },
-      { cat: 'sapi', warn: true, q: 'Apa gejala PMK pada sapi?', a: 'Demam, lepuh di mulut dan kuku, air liur berlebih, pincang, tidak mau makan, dan susu turun. PMK menular: pisahkan hewan, jangan dipindahkan, lalu segera lapor ke dinas peternakan atau dokter hewan.' },
-      { cat: 'kambing', warn: true, q: 'Bagaimana mencegah cacingan?', a: 'Beri pakan dan air dari tempat bersih, hindari lahan lembap terus-menerus, jaga kandang kering, dan beri obat cacing sesuai jadwal dari petugas. Jangan menakar obat keras sendiri.' },
-      { cat: 'umum', q: 'Berapa banyak air yang dibutuhkan ternak?', a: 'Sapi sekitar 30 sampai 50 liter per hari, kambing 4 sampai 8 liter, ayam sekitar 0,25 liter. Kebutuhan naik saat cuaca panas, bunting, atau menyusui. Air harus bersih dan selalu tersedia.' },
-      { cat: 'umum', q: 'Bagaimana menyimpan pakan hijauan?', a: 'Keringkan dulu, simpan di tempat kering beralas kayu dan ada anginnya, jangan ditumpuk tebal. Hijauan basah yang bertumpuk cepat berjamur dan berbau asam.' },
-      { cat: 'ayam', warn: true, q: 'Ayam tidak mau makan, apa yang dicek?', a: 'Cek suhu dan kelembapan kandang, air minum, dan apakah ada ayam lain yang lemas atau mati mendadak. Pisahkan yang sakit, lalu konsultasi ke mantri atau dinas peternakan bila ada kematian mendadak.' },
-      { cat: 'sapi', q: 'Berapa porsi hijauan untuk sapi?', a: 'Kira-kira 10 persen dari bobot badan per hari, misalnya sapi 250 kg sekitar 25 kg hijauan segar, ditambah konsentrat bila perlu. Bagi menjadi dua kali pemberian.' },
-      { cat: 'kambing', warn: true, q: 'Kenapa anak kambing diare?', a: 'Sering karena susu berubah, pakan baru, atau infeksi. Jaga air bersih dan jangan biarkan lemas. Diare pada anak yang masih menyusu dan terlihat lemas perlu diperiksa dokter hewan.' },
-      { cat: 'umum', q: 'Bagaimana menjaga kandang tetap kering?', a: 'Beri alas sekam atau jerami kering dan ganti rutin, buat saluran air di luar kandang, dan jangan terlalu padat. Kandang lembap memicu penyakit kuku dan pernapasan.' },
-      { cat: 'umum', warn: true, q: 'Kapan harus menghubungi dokter hewan?', a: 'Bila hewan tidak mau makan lebih dari sehari, sulit bernapas, kejang, tidak bisa berdiri, melahirkan bermasalah, atau ada kematian mendadak. Untuk penyakit menular seperti PMK dan flu burung, laporkan ke dinas peternakan.' }
+      { cat: 'sapi', helps: 412, vet: false, q: 'Berapa lama sapi bunting?', a: 'Sekitar 9 bulan (±280 hari). Pisahkan induk ke kandang tenang menjelang melahirkan dan siapkan alas bersih.' },
+      { cat: 'kambing', helps: 268, vet: false, q: 'Berapa lama kambing bunting?', a: 'Sekitar 5 bulan (±150 hari). Domba mirip, sekitar 145 sampai 152 hari. Catat tanggal kawin supaya perkiraan lahir tepat.' },
+      { cat: 'sapi', helps: 194, vet: false, q: 'Apa tanda sapi birahi?', a: 'Gelisah, sering menaiki sapi lain, vulva bengkak dan berlendir bening, serta diam bila ditunggangi. Birahi datang tiap 18 sampai 24 hari; bila lebih lama, periksa ke mantri.' },
+      { cat: 'ayam', helps: 231, vet: false, q: 'Kapan ayam divaksin ND?', a: 'Umumnya umur 3 sampai 4 hari (tetes mata atau air minum), diulang umur 3 sampai 4 minggu, lalu tiap 3 sampai 4 bulan. Ikuti jadwal petugas atau dinas peternakan setempat.' },
+      { cat: 'ayam', helps: 356, vet: false, q: 'Berapa hari telur ayam menetas?', a: 'Sekitar 21 hari. Mesin tetas dijaga sekitar 37,5 derajat Celsius dengan kelembapan 55 sampai 60 persen, dan dibalik 3 sampai 4 kali sehari. Telur itik lebih lama, sekitar 28 hari.' },
+      { cat: 'kambing', helps: 508, vet: true, warn: true, q: 'Kambing kembung, apa yang dilakukan?', a: 'Hentikan pakan beragi dan rumput basah, ajak berjalan pelan, beri air bersih. Kembung yang cepat membesar, sesak, atau hewan tidak mau berdiri adalah darurat: hubungi dokter hewan segera.' },
+      { cat: 'sapi', helps: 624, vet: true, warn: true, q: 'Apa gejala PMK pada sapi?', a: 'Demam, lepuh di mulut dan kuku, air liur berlebih, pincang, tidak mau makan, dan susu turun. PMK menular: pisahkan hewan, jangan dipindahkan, lalu segera lapor ke dinas peternakan atau dokter hewan.' },
+      { cat: 'kambing', helps: 287, vet: false, warn: true, q: 'Bagaimana mencegah cacingan?', a: 'Beri pakan dan air dari tempat bersih, hindari lahan lembap terus-menerus, jaga kandang kering, dan beri obat cacing sesuai jadwal dari petugas. Jangan menakar obat keras sendiri.' },
+      { cat: 'umum', helps: 342, vet: false, q: 'Berapa banyak air yang dibutuhkan ternak?', a: 'Sapi sekitar 30 sampai 50 liter per hari, kambing 4 sampai 8 liter, ayam sekitar 0,25 liter. Kebutuhan naik saat cuaca panas, bunting, atau menyusui. Air harus bersih dan selalu tersedia.' },
+      { cat: 'umum', helps: 176, vet: false, q: 'Bagaimana menyimpan pakan hijauan?', a: 'Keringkan dulu, simpan di tempat kering beralas kayu dan ada anginnya, jangan ditumpuk tebal. Hijauan basah yang bertumpuk cepat berjamur dan berbau asam.' },
+      { cat: 'ayam', helps: 298, vet: false, warn: true, q: 'Ayam tidak mau makan, apa yang dicek?', a: 'Cek suhu dan kelembapan kandang, air minum, dan apakah ada ayam lain yang lemas atau mati mendadak. Pisahkan yang sakit, lalu konsultasi ke mantri atau dinas peternakan bila ada kematian mendadak.' },
+      { cat: 'sapi', helps: 152, vet: false, q: 'Berapa porsi hijauan untuk sapi?', a: 'Kira-kira 10 persen dari bobot badan per hari, misalnya sapi 250 kg sekitar 25 kg hijauan segar, ditambah konsentrat bila perlu. Bagi menjadi dua kali pemberian.' },
+      { cat: 'kambing', helps: 219, vet: true, warn: true, q: 'Kenapa anak kambing diare?', a: 'Sering karena susu berubah, pakan baru, atau infeksi. Jaga air bersih dan jangan biarkan lemas. Diare pada anak yang masih menyusu dan terlihat lemas perlu diperiksa dokter hewan.' },
+      { cat: 'umum', helps: 183, vet: false, q: 'Bagaimana menjaga kandang tetap kering?', a: 'Beri alas sekam atau jerami kering dan ganti rutin, buat saluran air di luar kandang, dan jangan terlalu padat. Kandang lembap memicu penyakit kuku dan pernapasan.' },
+      { cat: 'umum', helps: 451, vet: true, warn: true, q: 'Kapan harus menghubungi dokter hewan?', a: 'Bila hewan tidak mau makan lebih dari sehari, sulit bernapas, kejang, tidak bisa berdiri, melahirkan bermasalah, atau ada kematian mendadak. Untuk penyakit menular seperti PMK dan flu burung, laporkan ke dinas peternakan.' }
     ];
 
     var faqSearch = document.getElementById('faq-search');
@@ -643,9 +692,15 @@
       return '<div class="card faq-card' + (open ? ' open' : '') + '" data-key="' + esc(key) + '" data-i="' + i + '">' +
         '<button type="button" class="faq-top" aria-expanded="' + (open ? 'true' : 'false') + '">' +
           '<span class="ic ' + f.cat + '">' + ICONS[f.cat] + '</span>' +
-          '<span class="q"><span class="qt">' + esc(f.q) + '</span>' +
+          '<span class="q">' +
+            '<span class="faq-meta"><span class="tag">' + esc(ANIMAL[f.cat]) + '</span></span>' +
+            '<span class="qt">' + esc(f.q) + '</span>' +
             '<span class="a' + (open ? '' : ' clip') + '">' + esc(f.a) + '</span>' +
-            '<span class="tag ' + f.cat + '">' + esc(ANIMAL[f.cat]) + '</span></span>' +
+            '<span class="faq-foot">' +
+              (f.vet ? '<span class="vet" data-vet="true">' + SHIELD + 'Terjawab dokter hewan</span>' : '') +
+              '<span class="helped">' + PEOPLE + esc(Number(f.helps || 0).toLocaleString('id-ID')) + ' terbantu</span>' +
+            '</span>' +
+          '</span>' +
           CHEV.down +
         '</button>' +
         '<div class="faq-more"><div class="faq-inner">' +
@@ -675,8 +730,9 @@
       faqList.innerHTML = shown.map(function (s) { return faqCard(s.f, s.i); }).join('');
       faqList.hidden = shown.length === 0;
       faqNone.hidden = shown.length !== 0;
-      // The tools stay out of the way while someone is searching.
+      // The tools and the tip stay out of the way while someone is searching.
       faqTools.hidden = needle !== '';
+      document.getElementById('tip-card').hidden = needle !== '';
     }
 
     // Opening and closing changes classes in place (not a re-render), so the
@@ -742,29 +798,107 @@
       if (ev.target.closest('.faq-top')) toggleFaq(card);
     });
 
+    function prefersReduced() {
+      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+
+    function renderFilterRow(id, selected) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = FILTERS.map(function (f) {
+        var on = f.cat === selected;
+        return '<button type="button" class="filter' + (on ? ' on' : '') + '" data-cat="' + f.cat + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
+          '<span class="filter-ic' + (f.cat === 'semua' ? '' : ' ' + f.cat) + '">' + f.icon + '</span>' +
+          '<span class="filter-label">' + esc(f.label) + '</span></button>';
+      }).join('');
+    }
+
+    // The slim bar under the filter row: thumb size and position follow the
+    // row's own scroll. It is hidden when every filter fits, so a wide window
+    // has no bar and a phone does.
+    function syncFilterHint(el) {
+      if (!el) return;
+      var wrap = el.parentElement;
+      var track = wrap && wrap.querySelector('.filter-track');
+      if (!track) return;
+      var max = el.scrollWidth - el.clientWidth;
+      if (max <= 1) {
+        track.hidden = true;
+        wrap.setAttribute('data-at-end', 'true');
+        return;
+      }
+      track.hidden = false;
+      var thumb = track.querySelector('.filter-thumb');
+      var w = el.clientWidth * el.clientWidth / el.scrollWidth;
+      var x = (el.scrollLeft / max) * (el.clientWidth - w);
+      if (thumb) {
+        thumb.style.width = w + 'px';
+        thumb.style.transform = 'translateX(' + x + 'px)';
+      }
+      wrap.setAttribute('data-at-start', el.scrollLeft <= 1 ? 'true' : 'false');
+      wrap.setAttribute('data-at-end', el.scrollLeft >= max - 1 ? 'true' : 'false');
+    }
+
+    function initFilterRow(id) {
+      renderFilterRow(id, 'semua');
+      var el = document.getElementById(id);
+      el.addEventListener('scroll', function () { syncFilterHint(el); }, { passive: true });
+      return el;
+    }
+
+    function revealFilter(chip) {
+      if (!chip || !chip.scrollIntoView) return;
+      chip.scrollIntoView({
+        block: 'nearest',
+        inline: 'center',
+        behavior: prefersReduced() ? 'auto' : 'smooth'
+      });
+    }
+
+    function renderTip() {
+      var today = new Date();
+      var start = new Date(today.getFullYear(), 0, 0);
+      var day = Math.floor((today - start) / 86400000);
+      var cat = faqCat !== 'semua' ? faqCat : TIP_ORDER[day % TIP_ORDER.length];
+      var ic = document.getElementById('tip-ic');
+      var card = document.getElementById('tip-card');
+      if (!card || !ic) return;
+      ic.className = 'tip-ic ' + cat;
+      ic.innerHTML = ICONS[cat];
+      document.getElementById('tip-cat').textContent = ANIMAL[cat];
+      document.getElementById('tip-text').textContent = TIPS[cat];
+    }
+
     function setChips(group, cat) {
-      group.querySelectorAll('.chip').forEach(function (c) {
+      group.querySelectorAll('[data-cat]').forEach(function (c) {
         var on = c.getAttribute('data-cat') === cat;
         c.classList.toggle('on', on);
         c.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
     }
 
-    var faqChips = document.getElementById('faq-chips');
+    var faqChips = initFilterRow('faq-chips');
+    window.addEventListener('resize', function () {
+      syncFilterHint(faqChips);
+      syncFilterHint(document.getElementById('forum-chips'));
+    });
     faqSearch.addEventListener('input', renderFaq);
     document.getElementById('faq-clear').addEventListener('click', function () {
       faqSearch.value = '';
       faqCat = 'semua';
       setChips(faqChips, faqCat);
       renderFaq();
+      renderTip();
       faqSearch.focus();
     });
     faqChips.addEventListener('click', function (ev) {
-      var chip = ev.target.closest('.chip');
+      var chip = ev.target.closest('[data-cat]');
       if (!chip) return;
       faqCat = chip.getAttribute('data-cat');
       setChips(faqChips, faqCat);
+      revealFilter(chip);
       renderFaq();
+      renderTip();
     });
 
     // ── Header: greeting and the safety note behind ⓘ ──────────────────────
@@ -937,6 +1071,8 @@
     });
 
     renderFaq();
+    renderTip();
+    requestAnimationFrame(function () { syncFilterHint(faqChips); });
 
     // ── Forum ──────────────────────────────────────────────────────────────
     var posts = [];
@@ -950,7 +1086,7 @@
     var postErr = document.getElementById('post-err');
     var forumNew = document.getElementById('forum-new');
     var forumEmptyCat = document.getElementById('forum-empty-cat');
-    var forumChips = document.getElementById('forum-chips');
+    var forumChips = initFilterRow('forum-chips');
     var forumCat = 'semua';
     var postsReady = false;
 
@@ -1082,10 +1218,11 @@
       openForm();
     });
     forumChips.addEventListener('click', function (ev) {
-      var chip = ev.target.closest('.chip');
+      var chip = ev.target.closest('[data-cat]');
       if (!chip) return;
       forumCat = chip.getAttribute('data-cat');
       setChips(forumChips, forumCat);
+      revealFilter(chip);
       if (postsReady) renderPosts();
     });
     document.getElementById('post-cancel').addEventListener('click', closeForm);

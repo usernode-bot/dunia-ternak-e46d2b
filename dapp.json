@@ -30,6 +30,51 @@
       ]
     },
     {
+      "id": "faq-tip",
+      "name": "FAQ tips card",
+      "path": "/#faq",
+      "expectSelector": "#tip-card",
+      "expectText": "Tips hari ini",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**"
+      ]
+    },
+    {
+      "id": "faq-round-filter",
+      "name": "FAQ round animal filter",
+      "path": "/#faq",
+      "expectSelector": "#faq-chips [data-cat=\"kambing\"]",
+      "expectText": "Kambing & Domba",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**"
+      ]
+    },
+    {
+      "id": "faq-metadata",
+      "name": "FAQ helped count and vet badge",
+      "path": "/#faq",
+      "expectSelector": "#faq-list [data-vet]",
+      "expectText": "Terjawab dokter hewan",
+      "impact": [
+        "public/**"
+      ]
+    },
+    {
+      "id": "faq-tool-icons",
+      "name": "FAQ tool cards with icons",
+      "path": "/#faq",
+      "expectSelector": "#tools .tool-ic",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**"
+      ]
+    },
+    {
       "id": "forum-demo",
       "name": "Forum demo",
       "path": "/?demo=1#forum",
