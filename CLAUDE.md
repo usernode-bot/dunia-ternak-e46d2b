@@ -129,7 +129,9 @@ change follows it, and updates it when a request changes the look on purpose.
   `styles/tailwind-input.css`; the dark look keeps each hue.
 - **Signature element:** a round marker on every FAQ question and forum post
   holding a line drawing of the animal's head (cow, goat, hen) or a small
-  barn for Umum. The animal filter chips carry the same drawings, small.
+  barn for Umum. The animal filter is one sideways-scrolling row of the same
+  drawings in round buttons, with the full name underneath and a slim green
+  position bar; the same row appears on the forum.
 - **Type scale:** screen titles are `text-heading` (20/28), `text-body`
   (18/26), `text-small` (16/22), captions 14 px at the smallest. Body text is
   18 px on purpose.
@@ -143,9 +145,13 @@ change follows it, and updates it when a request changes the look on purpose.
   scrolls above a fixed 64 px tab bar with no banner; the active tab sits in
   a soft green pill and Tanya AI's icon is always accent. Safety text also
   sits under every FAQ answer (a red-edged note on disease/medicine topics)
-  and as one plain line in Tanya AI. FAQ questions are separate cards; the
-  animal filter is one sideways-scrolling row. Buttons and fields are at
-  least 48 px tall.
+  and as one plain line in Tanya AI. FAQ questions are separate cards with
+  the animal name, a helped count and, where flagged, a green "Terjawab
+  dokter hewan" badge. Alat cepat is three uniform cards (green icon on top,
+  one-line title, short description); a soft-green "Tips hari ini" card sits
+  between the tools and the questions. Sections are 24 px apart and cards
+  16 px apart. A tab change fades the new view up over about 220 ms, and the
+  tab pill crossfades. Buttons and fields are at least 48 px tall.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -177,7 +183,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 - The 15 FAQ answers live in `public/index.html` as the `FAQ` array: they
   are app content, not stored rows. `warn: true` marks disease/medicine
-  topics, which get the firmer note.
+  topics, which get the firmer note. `helps` and `vet` are editorial
+  metadata for the card count and the "Terjawab dokter hewan" badge, not
+  analytics. `TIPS` holds one short tip per animal for "Tips hari ini";
+  with "Semua" selected it rotates by the local date.
 - The quick tools (Alat cepat) compute on the phone only. The vaccine and
   deworming schedule (`SCHEDULE`) gives timing only, never a drug name or
   dose. Sharing a FAQ shares text only, never the page URL (it carries the
