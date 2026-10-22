@@ -507,3 +507,108 @@ select.field {appearance: none; background-image: none}
   line-height: 21px;
   color: rgb(var(--muted));
 }
+
+/* ── Ternakku: the list and one animal's record ────────────────────────────
+   The animal marker stays the signature element; a photo takes its place in
+   the record's header. Records use the same lists, buttons and fields as the
+   other tabs. */
+.back {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: rgb(var(--muted));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.back:focus-visible {outline: 2px solid rgb(var(--focus)); outline-offset: 2px}
+
+.animal-li {padding: 0}
+.animal-btn {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 16px;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.animal-btn:focus-visible {outline: 2px solid rgb(var(--focus)); outline-offset: -2px; border-radius: 12px}
+.animal-btn .m {flex: 1; min-width: 0; display: flex; flex-direction: column}
+/* The record's rows are built with spans, so give their title and meta the
+   same stacked layout the forum's div-based rows get for free. */
+#animal-body .list-row .m > .t,
+#animal-body .list-row .m > .meta {display: block}
+.animal-btn .t {font-weight: 600; overflow-wrap: anywhere}
+.animal-btn .meta-due {color: rgb(var(--danger)); font-weight: 600}
+.cv.next {flex: none; color: rgb(var(--muted)); margin-top: 0}
+
+#animal-title {overflow-wrap: anywhere}
+.animal-head {display: flex; gap: 12px; align-items: center; margin: 0 16px 12px}
+.animal-head .ic {width: 64px; height: 64px}
+.animal-head .ic svg {width: 36px; height: 36px}
+.animal-head .m {flex: 1; min-width: 0}
+.animal-head .animal-kind {font-size: 20px; line-height: 28px; font-weight: 700}
+.animal-head .meta {font-size: 16px; line-height: 22px; color: rgb(var(--muted)); margin-top: 2px}
+
+.reminder {flex-wrap: wrap; align-items: flex-start}
+.reminder .m {flex: 1 1 170px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start}
+.reminder .ghost.inline {display: inline-flex; align-items: center; margin-top: 2px; min-height: 44px}
+.due-badge {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: rgb(var(--raised));
+  color: rgb(var(--muted));
+  white-space: nowrap;
+}
+.due-badge.late {background: rgb(var(--warn-bg)); color: rgb(var(--danger))}
+.due-badge.today {background: rgb(var(--accent-soft)); color: rgb(var(--accent))}
+.reminder-note {margin: 8px 17px 0}
+
+.weight-hero {display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 16px 8px}
+.weight-hero b {font-size: 28px; line-height: 34px; color: rgb(var(--fg))}
+.weight-hero span {font-size: 15px; line-height: 21px; color: rgb(var(--muted))}
+
+.chart-wrap {
+  margin: 0 16px 8px;
+  padding: 8px 4px 0;
+  border: 1px solid rgb(var(--line));
+  border-radius: 12px;
+  background: rgb(var(--surface));
+}
+.chart-wrap svg {display: block; width: 100%; height: auto}
+.chart-grid {stroke: rgb(var(--line)); stroke-width: 1}
+.chart-axis {fill: rgb(var(--muted)); font-size: 11px; font-family: inherit}
+.chart-area {fill: rgb(var(--accent)); opacity: .10}
+.chart-line {fill: none; stroke: rgb(var(--accent)); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round}
+.chart-dot {fill: rgb(var(--accent)); stroke: rgb(var(--surface)); stroke-width: 2}
+
+.note-meta {display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 21px; color: rgb(var(--muted))}
+.tag-note {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: rgb(var(--raised));
+  color: rgb(var(--muted));
+}
+.tag-note.sakit,
+.tag-note.obat {background: rgb(var(--warn-bg)); color: rgb(var(--fg)); border-left: 3px solid rgb(var(--danger))}
+.note-row .body {display: block; font-size: 17px; line-height: 26px; margin-top: 6px; white-space: pre-wrap; overflow-wrap: anywhere}
+
+#animal-body .acts {margin-bottom: 12px}
+.animal-danger {margin-top: 24px; margin-bottom: 0}
+.danger-text {color: rgb(var(--danger))}

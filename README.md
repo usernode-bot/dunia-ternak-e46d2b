@@ -1,11 +1,16 @@
 # TernakKu
 
 Panduan ternak dalam bahasa Indonesia untuk peternak kecil, berjalan di
-Homeroom. Satu layar dengan tiga tab:
+Homeroom. Satu layar dengan empat tab:
 
 - **FAQ**: 15 pertanyaan umum soal sapi, kambing dan domba, ayam, serta
   urusan kandang. Ada kolom cari dan saringan per hewan; tiap pertanyaan
   dibuka dan ditutup dengan sekali ketuk.
+- **Ternakku**: catatan ternak milik sendiri. Tiap ternak punya nama atau
+  nomor telinga, jenis, umur, foto, catatan berat, pengingat vaksin, obat
+  cacing, perkiraan lahir dan jadwal timbang, grafik pertumbuhan, serta
+  catatan sakit dan pengobatan yang bisa dibagikan ke dokter hewan lewat
+  WhatsApp. Catatan ini hanya terlihat oleh akun Homeroom pemiliknya.
 - **Forum**: peternak menulis pertanyaan (judul, isi, nama panggilan) dan
   membalas pertanyaan orang lain. Postingan terbaru di atas dan tersimpan di
   database, jadi semua pengguna melihatnya. Tiap postingan punya tombol

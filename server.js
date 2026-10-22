@@ -207,6 +207,47 @@ async function ensureSchema() {
       created_at timestamptz NOT NULL DEFAULT now()
     );
     COMMENT ON TABLE forum_reports IS 'staging:private';
+
+    CREATE TABLE IF NOT EXISTS animals (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      name text NOT NULL,
+      kind text NOT NULL,
+      age_months integer,
+      photo_url text,
+      photo_id text,
+      last_vaccine_on date,
+      last_deworm_on date,
+      mated_on date,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS animals_owner ON animals (user_id, created_at DESC);
+    CREATE TABLE IF NOT EXISTS animal_weights (
+      id serial PRIMARY KEY,
+      animal_id integer NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+      user_id text NOT NULL,
+      weighed_on date NOT NULL,
+      chest_cm numeric(5,1),
+      body_length_cm numeric(5,1),
+      weight_kg numeric(6,1) NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS animal_weights_animal ON animal_weights (animal_id, weighed_on);
+    CREATE TABLE IF NOT EXISTS animal_notes (
+      id serial PRIMARY KEY,
+      animal_id integer NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+      user_id text NOT NULL,
+      kind text NOT NULL,
+      note_date date NOT NULL,
+      body text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS animal_notes_animal ON animal_notes (animal_id, note_date DESC);
+    -- One farmer's animals, their weights and their health notes are nobody
+    -- else's business: staging gets the schema but not the rows.
+    COMMENT ON TABLE animals IS 'staging:private';
+    COMMENT ON TABLE animal_weights IS 'staging:private';
+    COMMENT ON TABLE animal_notes IS 'staging:private';
   `);
 }
 
@@ -263,6 +304,91 @@ function photoFields(body) {
   if (!/^[0-9a-f]{32}$/.test(id)) return false;
   if (appFileId(url) !== id) return false;
   return { url, id };
+}
+
+// ── Ternakku: a farmer's animal records ─────────────────────────────────────
+// These rows belong to one Homeroom account. Every route below reads them by
+// user_id, so nobody can open another farmer's animal.
+const ANIMAL_KINDS = new Set(['sapi', 'kambing', 'domba', 'ayam']);
+const NOTE_KINDS = new Set(['harian', 'sakit', 'obat']);
+
+// A date-only value ("2026-10-22"), or null when nothing was sent. `false`
+// means something was sent that is not a real calendar day.
+function dayField(value) {
+  if (value === undefined || value === null || value === '') return null;
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(value + 'T00:00:00Z');
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) return false;
+  return value;
+}
+
+function intField(value, min, max) {
+  if (value === undefined || value === null || value === '') return null;
+  const n = Number(value);
+  return Number.isInteger(n) && n >= min && n <= max ? n : false;
+}
+
+// The farmer's own day. This app's farmers are in Indonesia, so reminders and
+// the default date of a new record use Asia/Jakarta (WIB), not the container's
+// UTC clock: at 05:00 WIB the UTC day is still yesterday.
+const JAKARTA_DAY = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+function todayJakarta(now) {
+  const parts = {};
+  for (const part of JAKARTA_DAY.formatToParts(now)) parts[part.type] = part.value;
+  return parts.year + '-' + parts.month + '-' + parts.day;
+}
+
+function animalJson(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    kind: row.kind,
+    age_months: row.age_months === null ? null : Number(row.age_months),
+    photo_url: row.photo_url || null,
+    photo_id: row.photo_id || null,
+    last_vaccine_on: row.last_vaccine_on || null,
+    last_deworm_on: row.last_deworm_on || null,
+    mated_on: row.mated_on || null,
+    latest_weight_kg: row.latest_weight_kg === undefined || row.latest_weight_kg === null
+      ? null : Number(row.latest_weight_kg),
+    latest_weighed_on: row.latest_weighed_on || null,
+    created_at: iso(row.created_at),
+  };
+}
+
+const ANIMAL_SELECT = `
+  SELECT a.id, a.name, a.kind, a.age_months, a.photo_url, a.photo_id,
+         to_char(a.last_vaccine_on, 'YYYY-MM-DD') AS last_vaccine_on,
+         to_char(a.last_deworm_on,  'YYYY-MM-DD') AS last_deworm_on,
+         to_char(a.mated_on,        'YYYY-MM-DD') AS mated_on,
+         a.created_at,
+         w.weight_kg AS latest_weight_kg,
+         to_char(w.weighed_on, 'YYYY-MM-DD') AS latest_weighed_on
+    FROM animals a
+    LEFT JOIN LATERAL (
+      SELECT weight_kg, weighed_on FROM animal_weights
+       WHERE animal_id = a.id
+       ORDER BY weighed_on DESC, id DESC
+       LIMIT 1
+    ) w ON true`;
+
+async function ownedAnimal(id, userId) {
+  if (!Number.isInteger(id) || id <= 0) return null;
+  const { rows } = await pool.query(
+    ANIMAL_SELECT + ' WHERE a.id = $1 AND a.user_id = $2',
+    [id, userId]
+  );
+  return rows[0] || null;
+}
+
+// The same two formulas the quick "Estimasi berat" tool uses: Schoorl for
+// cattle, Lambourne for goats and sheep. A chicken has no chest formula, so
+// its weight comes from a scale.
+function estimateWeight(kind, chest, length) {
+  if (kind === 'sapi') return Math.pow(chest + 22, 2) / 100;
+  return (chest * chest * length) / 10840;
 }
 
 // Staging seed: obviously fake farmers and questions, so the populated
@@ -583,6 +709,261 @@ app.post('/api/reports', async (req, res) => {
   }
 });
 
+// ── Ternakku routes ────────────────────────────────────────────────────────
+// A guest may read, but has no animals of their own: an empty list is the
+// honest answer, and the page shows its sign-in empty state.
+app.get('/api/animals', async (req, res) => {
+  if (!req.user) return res.json({ animals: [] });
+  try {
+    const { rows } = await pool.query(
+      ANIMAL_SELECT + ' WHERE a.user_id = $1 ORDER BY a.created_at DESC, a.id DESC',
+      [req.user.id]
+    );
+    res.json({ animals: rows.map(animalJson) });
+  } catch (err) {
+    console.error('GET /api/animals failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/animals', async (req, res) => {
+  const body = req.body || {};
+  const name = textField(body.name, 60);
+  const kind = body.kind;
+  const ageMonths = intField(body.age_months, 0, 400);
+  if (!name || !ANIMAL_KINDS.has(kind) || ageMonths === false) {
+    return res.status(400).json({ error: 'invalid_animal' });
+  }
+  const photo = photoFields(body);
+  if (photo === false) return res.status(400).json({ error: 'invalid_photo' });
+  let weightKg = null;
+  if (body.weight_kg !== undefined && body.weight_kg !== null && body.weight_kg !== '') {
+    weightKg = Number(body.weight_kg);
+    if (!Number.isFinite(weightKg) || weightKg <= 0.05 || weightKg > 2000) {
+      return res.status(400).json({ error: 'invalid_weight' });
+    }
+    weightKg = Math.round(weightKg * 10) / 10;
+  }
+  const db = await pool.connect();
+  try {
+    await db.query('BEGIN');
+    const inserted = await db.query(
+      `INSERT INTO animals (user_id, name, kind, age_months, photo_url, photo_id)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+      [req.user.id, name, kind, ageMonths, photo ? photo.url : null, photo ? photo.id : null]
+    );
+    const id = inserted.rows[0].id;
+    // A weight typed in at creation is a real weighing, so the growth chart
+    // and the weighing reminder start from today.
+    if (weightKg !== null) {
+      await db.query(
+        `INSERT INTO animal_weights (animal_id, user_id, weighed_on, weight_kg)
+         VALUES ($1,$2,$3,$4)`,
+        [id, req.user.id, todayJakarta(req.now), weightKg]
+      );
+    }
+    await db.query('COMMIT');
+    res.status(201).json({ id });
+  } catch (err) {
+    await db.query('ROLLBACK').catch(() => {});
+    console.error('POST /api/animals failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  } finally {
+    db.release();
+  }
+});
+
+app.get('/api/animals/:id', async (req, res) => {
+  if (!req.user) return res.status(404).json({ error: 'not_found' });
+  const id = Number(req.params.id);
+  try {
+    const row = await ownedAnimal(id, req.user.id);
+    if (!row) return res.status(404).json({ error: 'not_found' });
+    const [weights, notes] = await Promise.all([
+      pool.query(
+        `SELECT id, to_char(weighed_on, 'YYYY-MM-DD') AS weighed_on,
+                chest_cm, body_length_cm, weight_kg
+           FROM animal_weights
+          WHERE animal_id = $1
+          ORDER BY weighed_on ASC, id ASC`,
+        [id]
+      ),
+      pool.query(
+        `SELECT id, kind, to_char(note_date, 'YYYY-MM-DD') AS note_date, body, created_at
+           FROM animal_notes
+          WHERE animal_id = $1
+          ORDER BY note_date DESC, id DESC`,
+        [id]
+      ),
+    ]);
+    res.json({
+      animal: Object.assign(animalJson(row), {
+        weights: weights.rows.map((w) => ({
+          id: w.id,
+          weighed_on: w.weighed_on,
+          chest_cm: w.chest_cm === null ? null : Number(w.chest_cm),
+          body_length_cm: w.body_length_cm === null ? null : Number(w.body_length_cm),
+          weight_kg: Number(w.weight_kg),
+        })),
+        notes: notes.rows.map((n) => ({
+          id: n.id,
+          kind: n.kind,
+          note_date: n.note_date,
+          body: n.body,
+          created_at: iso(n.created_at),
+        })),
+      }),
+    });
+  } catch (err) {
+    console.error('GET /api/animals/:id failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// The care dates are what the reminders in the page count from. A date in the
+// future is refused: it would put a reminder in a schedule that has not
+// happened yet.
+app.patch('/api/animals/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    const current = await ownedAnimal(id, req.user.id);
+    if (!current) return res.status(404).json({ error: 'not_found' });
+    const body = req.body || {};
+    const has = (key) => Object.prototype.hasOwnProperty.call(body, key);
+    const name = has('name') ? textField(body.name, 60) : current.name;
+    const kind = has('kind') ? body.kind : current.kind;
+    const ageMonths = has('age_months') ? intField(body.age_months, 0, 400) : current.age_months;
+    if (!name || !ANIMAL_KINDS.has(kind) || ageMonths === false) {
+      return res.status(400).json({ error: 'invalid_animal' });
+    }
+    const dates = {};
+    for (const key of ['last_vaccine_on', 'last_deworm_on', 'mated_on']) {
+      if (!has(key)) {
+        dates[key] = current[key];
+        continue;
+      }
+      const parsed = dayField(body[key]);
+      if (parsed === false) return res.status(400).json({ error: 'invalid_date' });
+      dates[key] = parsed;
+    }
+    const today = todayJakarta(req.now);
+    for (const key of Object.keys(dates)) {
+      if (dates[key] && dates[key] > today) {
+        return res.status(400).json({ error: 'invalid_date' });
+      }
+    }
+    await pool.query(
+      `UPDATE animals
+          SET name = $3, kind = $4, age_months = $5,
+              last_vaccine_on = $6, last_deworm_on = $7, mated_on = $8
+        WHERE id = $1 AND user_id = $2`,
+      [id, req.user.id, name, kind, ageMonths === null ? null : Number(ageMonths),
+       dates.last_vaccine_on, dates.last_deworm_on, dates.mated_on]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('PATCH /api/animals/:id failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.delete('/api/animals/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid_id' });
+  try {
+    const deleted = await pool.query(
+      'DELETE FROM animals WHERE id = $1 AND user_id = $2',
+      [id, req.user.id]
+    );
+    if (!deleted.rowCount) return res.status(403).json({ error: 'forbidden' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/animals/:id failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// A weight comes either from a scale (`weight_kg`) or from the same chest
+// measurements the quick tool uses. The server computes the estimate so the
+// chart cannot be fed a number the formula did not produce.
+app.post('/api/animals/:id/weights', async (req, res) => {
+  const id = Number(req.params.id);
+  const body = req.body || {};
+  try {
+    const animal = await ownedAnimal(id, req.user.id);
+    if (!animal) return res.status(404).json({ error: 'not_found' });
+    let weighedOn = dayField(body.weighed_on);
+    if (weighedOn === false) return res.status(400).json({ error: 'invalid_date' });
+    const today = todayJakarta(req.now);
+    if (!weighedOn) weighedOn = today;
+    if (weighedOn > today) return res.status(400).json({ error: 'invalid_date' });
+
+    let weightKg;
+    let chest = null;
+    let length = null;
+    const direct = body.weight_kg === undefined || body.weight_kg === null || body.weight_kg === ''
+      ? null : Number(body.weight_kg);
+    if (direct !== null) {
+      if (!Number.isFinite(direct) || direct <= 0.05 || direct > 2000) {
+        return res.status(400).json({ error: 'invalid_weight' });
+      }
+      weightKg = direct;
+    } else {
+      if (animal.kind === 'ayam') return res.status(400).json({ error: 'invalid_weight' });
+      chest = Number(body.chest_cm);
+      if (!Number.isFinite(chest) || chest < 40 || chest > 250) {
+        return res.status(400).json({ error: 'invalid_measurement' });
+      }
+      if (animal.kind !== 'sapi') {
+        length = Number(body.body_length_cm);
+        if (!Number.isFinite(length) || length < 20 || length > 200) {
+          return res.status(400).json({ error: 'invalid_measurement' });
+        }
+      }
+      weightKg = estimateWeight(animal.kind, chest, length);
+    }
+    weightKg = Math.round(weightKg * 10) / 10;
+    const inserted = await pool.query(
+      `INSERT INTO animal_weights
+         (animal_id, user_id, weighed_on, chest_cm, body_length_cm, weight_kg)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+      [id, req.user.id, weighedOn, chest, length, weightKg]
+    );
+    res.status(201).json({ id: inserted.rows[0].id, weighed_on: weighedOn, weight_kg: weightKg });
+  } catch (err) {
+    console.error('POST /api/animals/:id/weights failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/animals/:id/notes', async (req, res) => {
+  const id = Number(req.params.id);
+  const body = req.body || {};
+  try {
+    const animal = await ownedAnimal(id, req.user.id);
+    if (!animal) return res.status(404).json({ error: 'not_found' });
+    const kind = body.kind;
+    const text = textField(body.body, 2000);
+    if (!NOTE_KINDS.has(kind) || !text) {
+      return res.status(400).json({ error: 'invalid_note' });
+    }
+    let noteDate = dayField(body.note_date);
+    if (noteDate === false) return res.status(400).json({ error: 'invalid_date' });
+    const today = todayJakarta(req.now);
+    if (!noteDate) noteDate = today;
+    if (noteDate > today) return res.status(400).json({ error: 'invalid_date' });
+    const inserted = await pool.query(
+      `INSERT INTO animal_notes (animal_id, user_id, kind, note_date, body)
+       VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+      [id, req.user.id, kind, noteDate, text]
+    );
+    res.status(201).json({ id: inserted.rows[0].id });
+  } catch (err) {
+    console.error('POST /api/animals/:id/notes failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
 // ── Tanya AI ───────────────────────────────────────────────────────────────
 // Claude through the platform's LLM proxy, billed to the signed-in person's
 // own AI budget. Staging gets no proxy credentials: the route says so and
@@ -605,6 +986,8 @@ const AI_SYSTEM_PROMPT = [
   '  dan tolak topik di luar peternakan. Untuk topik seperti itu, tolak dengan sopan dan singkat',
   '  tanpa menjelaskannya, lalu tawarkan kembali membantu soal ternak.',
   '- Hindari diagnosis pasti; sebut kemungkinan dan langkah yang aman.',
+  '- Jika pengguna menyertakan data ternaknya (jenis, umur, berat, pengingat atau catatan),',
+  '  pakai data itu dalam jawaban dan jangan mengulanginya berlebihan.',
   '- Peternak bisa mengirim foto ternak. Jelaskan hanya apa yang terlihat dan berkaitan dengan',
   '  ternak, kandang atau pakan, dan katakan bahwa foto tidak cukup untuk diagnosis pasti.',
   '- Jika foto tidak berisi ternak, kandang atau pakan, atau berisi hal yang dilarang di atas,',
