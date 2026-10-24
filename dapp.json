@@ -33,7 +33,7 @@
       "id": "faq-tip",
       "name": "FAQ tips card",
       "path": "/#faq",
-      "expectSelector": "#tip-card",
+      "expectSelector": "#tip-card .tip-close",
       "expectText": "Tips hari ini",
       "visual": true,
       "impact": [
@@ -46,7 +46,7 @@
       "name": "FAQ round animal filter",
       "path": "/#faq",
       "expectSelector": "#faq-chips [data-cat=\"kambing\"]",
-      "expectText": "Kambing & Domba",
+      "expectText": "Kambing/Domba",
       "visual": true,
       "impact": [
         "public/**",

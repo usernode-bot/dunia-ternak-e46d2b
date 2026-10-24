@@ -115,12 +115,12 @@
               <span class="tool-desc">dari tanggal kawin</span>
             </button>
             <button type="button" class="tool" data-tool="jadwal" aria-expanded="false">
-              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4l6 6M17 7l-9 9-4 1 1-4 9-9z"/><path d="M5 19l-2 2M12 6l6 6"/></svg></span>
+              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4M19 5l-3 3"/><path d="M14 6l4 4-8 8H6v-4z"/><path d="M10 10l2 2M8 12l2 2"/><path d="M6 18l-3 3"/></svg></span>
               <span class="tool-title">Jadwal vaksin</span>
               <span class="tool-desc">vaksin &amp; obat cacing</span>
             </button>
             <button type="button" class="tool" data-tool="berat" aria-expanded="false">
-              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M7 20V9a5 5 0 0 1 10 0v11M12 9l2-3"/></svg></span>
+              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 11a4 4 0 0 1 8 0z"/><path d="M12 11l1.5-2"/></svg></span>
               <span class="tool-title">Berat badan</span>
               <span class="tool-desc">dari lingkar dada</span>
             </button>
@@ -131,6 +131,7 @@
           <div class="tip-head">
             <span class="tip-ic" id="tip-ic" aria-hidden="true"></span>
             <div><p class="tip-kicker">Tips hari ini</p><p class="tip-cat" id="tip-cat"></p></div>
+            <button type="button" class="tip-close" id="tip-close" aria-label="Tutup tips hari ini"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
           </div>
           <p class="tip-text" id="tip-text" aria-live="polite"></p>
         </div>
@@ -348,11 +349,13 @@
     var KIND_NAME = { sapi: 'Sapi', kambing: 'Kambing', domba: 'Domba', ayam: 'Ayam' };
     // The filter row and the tool cards use the same line drawings as the
     // animal markers, with one extra "all" mark and three tool marks.
+    // The kambing chip says "Kambing/Domba" on one line so every chip is the
+    // same height; ANIMAL.kambing keeps the fuller name on cards and tips.
     var FILTER_ALL = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>';
     var FILTERS = [
       { cat: 'semua', label: 'Semua', icon: FILTER_ALL },
       { cat: 'sapi', label: ANIMAL.sapi, icon: ICONS.sapi },
-      { cat: 'kambing', label: ANIMAL.kambing, icon: ICONS.kambing },
+      { cat: 'kambing', label: 'Kambing/Domba', icon: ICONS.kambing },
       { cat: 'ayam', label: ANIMAL.ayam, icon: ICONS.ayam },
       { cat: 'umum', label: ANIMAL.umum, icon: ICONS.umum }
     ];
@@ -714,6 +717,9 @@
     }
 
     var FAQ_ORDER = ['sapi', 'kambing', 'ayam', 'umum'];
+    // Closed for this page load only: the tip comes back when the app reopens,
+    // and neither searching nor changing the animal brings it back.
+    var tipClosed = false;
 
     function renderFaq() {
       var needle = faqSearch.value.trim().toLowerCase();
@@ -732,7 +738,7 @@
       faqNone.hidden = shown.length !== 0;
       // The tools and the tip stay out of the way while someone is searching.
       faqTools.hidden = needle !== '';
-      document.getElementById('tip-card').hidden = needle !== '';
+      document.getElementById('tip-card').hidden = tipClosed || needle !== '';
     }
 
     // Opening and closing changes classes in place (not a re-render), so the
@@ -878,6 +884,14 @@
     }
 
     var faqChips = initFilterRow('faq-chips');
+    // Closing the tip shrinks the FAQ header; send keyboard focus to the first
+    // question so a screen-reader user does not lose their place.
+    document.getElementById('tip-close').addEventListener('click', function () {
+      tipClosed = true;
+      document.getElementById('tip-card').hidden = true;
+      var first = faqList.querySelector('.faq-top');
+      if (first) first.focus();
+    });
     window.addEventListener('resize', function () {
       syncFilterHint(faqChips);
       syncFilterHint(document.getElementById('forum-chips'));
