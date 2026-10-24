@@ -1,8 +1,8 @@
 {
-  "description": "Panduan ternak untuk peternak kecil",
+  "description": "Panduan ternak untuk peternak kecil: sapi, kambing, domba dan ayam",
   "category": "other",
   "icon": {
-    "emoji": "🐄"
+    "emoji": "🐾"
   },
   "secrets": [],
   "governance": {
@@ -83,6 +83,23 @@
         "public/**",
         "styles/**"
       ]
+    },
+    {
+      "id": "faq-header-mark",
+      "name": "FAQ header logo mark",
+      "path": "/#faq",
+      "expectSelector": "#view-faq .hd #faq-mark[data-cat=\"semua\"] svg",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**"
+      ]
+    },
+    {
+      "id": "faq-tagline",
+      "name": "FAQ tagline in info note",
+      "path": "/#faq",
+      "expectSelector": "#view-faq .safety [data-tagline]"
     },
     {
       "id": "forum-demo",

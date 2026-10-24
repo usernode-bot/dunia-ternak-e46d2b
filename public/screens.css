@@ -329,6 +329,19 @@ select.field {appearance: none; background-image: none}
 .info {width: 44px; height: 44px; flex: none; border: 0; border-radius: 22px; background: none; color: rgb(var(--muted)); display: inline-flex; align-items: center; justify-content: center}
 .info[aria-expanded="true"] {background: rgb(var(--raised)); color: rgb(var(--fg))}
 .safety {margin: 0 16px 12px; padding: 10px 12px; border-radius: 12px; background: rgb(var(--raised)); font-size: 16px; line-height: 22px}
+.safety .tagline {display: block; font-weight: 700; margin-bottom: 4px}
+
+/* The app mark: the cow, goat and hen drawings in one circle, left of the
+   FAQ title, swapped for the selected animal's marker. The .hd > prefix
+   beats .hd span's muted colour, and this stays a span so .hd div's flex
+   does not stretch it. */
+.hd > .hd-mark {width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none}
+.hd > .hd-mark.semua svg {width: 32px; height: 32px; display: block}
+.hd > .hd-mark.semua {background: rgb(var(--accent-soft)); color: rgb(var(--accent))}
+.hd > .hd-mark.sapi {background: rgb(var(--earth-bg)); color: rgb(var(--earth))}
+.hd > .hd-mark.kambing {background: rgb(var(--straw-bg)); color: rgb(var(--straw))}
+.hd > .hd-mark.ayam {background: rgb(var(--raised)); color: rgb(var(--accent))}
+.hd > .hd-mark.umum {background: rgb(var(--raised)); color: rgb(var(--muted))}
 
 /* Alat cepat: three uniform cards with a green mark, one-line title and a
    short description, then the open tool's panel below. */

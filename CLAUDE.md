@@ -95,7 +95,7 @@ tables you've marked private), etc.
 
 ## About Dunia Ternak
 
-Panduan ternak untuk peternak kecil
+Panduan ternak untuk peternak kecil: sapi, kambing, domba dan ayam
 
 TernakKu is a livestock guide for small farmers in Indonesia, in Indonesian.
 One screen with four tabs: a searched and filtered FAQ of 15 common
@@ -143,6 +143,12 @@ change follows it, and updates it when a request changes the look on purpose.
   barn for Umum. The animal filter is one sideways-scrolling row of the same
   drawings in round buttons, with the full name underneath and a slim green
   position bar; the same row appears on the forum.
+- **App mark:** a round circle holding the cow, goat and hen drawings of the
+  animal markers as one picture, on `accent-soft` with an `accent` line. It
+  is the browser tab icon and sits left of "TernakKu" in the FAQ header
+  while "Semua" is picked. When the FAQ filter picks an animal, the header
+  mark becomes that animal's own marker in the filter row's colours, and
+  "Hapus" brings the app mark back. The Homeroom project emoji is 🐾.
 - **Type scale:** screen titles are `text-heading` (20/28), `text-body`
   (18/26), `text-small` (16/22), captions 14 px at the smallest. Body text is
   18 px on purpose.
@@ -152,7 +158,8 @@ change follows it, and updates it when a request changes the look on purpose.
   bubble (max 240 px wide). No new colours.
 - **Layout:** each tab's header has a small title (the FAQ one with a
   time-of-day greeting) and an ⓘ button that opens the safety note
-  ("Informasi umum, bukan pengganti dokter hewan. ..."). The tab's content
+  ("Informasi umum, bukan pengganti dokter hewan. ..."); the FAQ note opens
+  with the bold tagline "Semua ternak, satu aplikasi". The tab's content
   scrolls above a fixed 64 px tab bar with no banner; the active tab sits in
   a soft green pill and Tanya AI's icon is always accent. Safety text also
   sits under every FAQ answer (a red-edged note on disease/medicine topics)
@@ -186,9 +193,9 @@ Re-theme by changing the token values there, keeping every text pair at
 - Seed obviously fake staging demo data so the populated screen can be seen
   ("Staging mock data" in the platform conventions).
 - No cards in cards, no uppercase eyebrows, no emoji as icons.
-- A header that shows the app's own mark shows the project's icon there
-  (the emoji in `dapp.json`'s `icon` block) or no mark at all: never an
-  empty tile, and never `brand/icon.png`, which the app does not serve.
+- A header that shows the app's own mark shows the drawn three-head app mark
+  described above, or no mark at all: never an empty tile, and never
+  `brand/icon.png`, which the app does not serve.
 
 ## App-specific conventions
 
