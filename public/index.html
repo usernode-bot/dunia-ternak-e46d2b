@@ -115,12 +115,12 @@
               <span class="tool-desc">dari tanggal kawin</span>
             </button>
             <button type="button" class="tool" data-tool="jadwal" aria-expanded="false">
-              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4l6 6M17 7l-9 9-4 1 1-4 9-9z"/><path d="M5 19l-2 2M12 6l6 6"/></svg></span>
+              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2l4 4M17 7l3-3"/><path d="M19 9L8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="M9 11l4 4M5 19l-3 3M14 4l6 6"/></svg></span>
               <span class="tool-title">Jadwal vaksin</span>
               <span class="tool-desc">vaksin &amp; obat cacing</span>
             </button>
             <button type="button" class="tool" data-tool="berat" aria-expanded="false">
-              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M7 20V9a5 5 0 0 1 10 0v11M12 9l2-3"/></svg></span>
+              <span class="tool-ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="M7 21h10M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg></span>
               <span class="tool-title">Berat badan</span>
               <span class="tool-desc">dari lingkar dada</span>
             </button>
@@ -130,7 +130,8 @@
         <div id="tip-card" class="tip-card">
           <div class="tip-head">
             <span class="tip-ic" id="tip-ic" aria-hidden="true"></span>
-            <div><p class="tip-kicker">Tips hari ini</p><p class="tip-cat" id="tip-cat"></p></div>
+            <div class="tip-title"><p class="tip-kicker">Tips hari ini</p><p class="tip-cat" id="tip-cat"></p></div>
+            <button type="button" class="tip-close" id="tip-close" aria-label="Tutup tips hari ini"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
           </div>
           <p class="tip-text" id="tip-text" aria-live="polite"></p>
         </div>
@@ -335,6 +336,15 @@
       });
     }
 
+    // The farmer's day is the Jakarta day (see todayIso); set up before
+    // anything renders, since the FAQ tip reads it on first paint.
+    var JAKARTA_DAY = null;
+    try {
+      JAKARTA_DAY = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit'
+      });
+    } catch (e) {}
+
     // ── Animal markers (the signature element) ─────────────────────────────
     var ICONS = {
       sapi: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7C4 7 3 5 3 3M17 7c3 0 4-2 4-4"/><path d="M7 9H4M17 9h3"/><path d="M7 6h10v7H7z"/><rect x="8" y="13" width="8" height="7" rx="2"/><path d="M10.5 16.5v.01M13.5 16.5v.01"/></svg>',
@@ -364,7 +374,6 @@
       ayam: 'Buka ventilasi kandang pagi hari agar lantai tidak lembap dan ayam tidak mudah sakit.',
       umum: 'Catat tanggal vaksin dan obat cacing di buku kandang supaya jadwal berikutnya tidak terlewat.'
     };
-    var TIP_ORDER = ['sapi', 'kambing', 'ayam', 'umum'];
     var CHEV = {
       up: '<svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>',
       down: '<svg class="cv" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
@@ -732,7 +741,7 @@
       faqNone.hidden = shown.length !== 0;
       // The tools and the tip stay out of the way while someone is searching.
       faqTools.hidden = needle !== '';
-      document.getElementById('tip-card').hidden = needle !== '';
+      document.getElementById('tip-card').hidden = needle !== '' || tipClosedToday();
     }
 
     // Opening and closing changes classes in place (not a re-render), so the
@@ -855,14 +864,20 @@
       });
     }
 
+    // The tip follows the chosen animal; with "Semua" it is the general
+    // (Umum) tip, which applies to every animal. Closing it hides it for the
+    // rest of the farmer's day, remembered on the phone.
+    var TIP_CLOSED_KEY = 'ternakku.tipClosed';
+    function tipClosedToday() {
+      try { return localStorage.getItem(TIP_CLOSED_KEY) === todayIso(); } catch (e) { return false; }
+    }
+
     function renderTip() {
-      var today = new Date();
-      var start = new Date(today.getFullYear(), 0, 0);
-      var day = Math.floor((today - start) / 86400000);
-      var cat = faqCat !== 'semua' ? faqCat : TIP_ORDER[day % TIP_ORDER.length];
+      var cat = faqCat !== 'semua' ? faqCat : 'umum';
       var ic = document.getElementById('tip-ic');
       var card = document.getElementById('tip-card');
       if (!card || !ic) return;
+      card.hidden = faqSearch.value.trim() !== '' || tipClosedToday();
       ic.className = 'tip-ic ' + cat;
       ic.innerHTML = ICONS[cat];
       document.getElementById('tip-cat').textContent = ANIMAL[cat];
@@ -890,6 +905,10 @@
       renderFaq();
       renderTip();
       faqSearch.focus();
+    });
+    document.getElementById('tip-close').addEventListener('click', function () {
+      try { localStorage.setItem(TIP_CLOSED_KEY, todayIso()); } catch (e) {}
+      document.getElementById('tip-card').hidden = true;
     });
     faqChips.addEventListener('click', function (ev) {
       var chip = ev.target.closest('[data-cat]');
@@ -1582,12 +1601,6 @@
       ayam: { vaccine: 120, deworm: 120 }
     };
     var WEIGH_DAYS = 30;
-    var JAKARTA_DAY = null;
-    try {
-      JAKARTA_DAY = new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit'
-      });
-    } catch (e) {}
 
     var animals = [];
     var animalsLoaded = false;
