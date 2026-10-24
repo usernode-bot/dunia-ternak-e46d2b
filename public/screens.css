@@ -144,7 +144,9 @@
   max-width: 42rem;
   min-height: 100vh;
   margin: 0 auto;
-  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  /* Inside the Homeroom frame bare env() is 0, so the platform's forwarded
+     inset comes first; it keeps the tab bar above Android's buttons. */
+  padding-bottom: calc(96px + var(--un-safe-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
 /* The animal filters: one sideways-scrolling row of round markers with the
@@ -163,9 +165,9 @@
 .filters::-webkit-scrollbar {display: none}
 .filter {
   flex: none;
-  width: 76px;
-  min-height: 96px;
-  padding: 0;
+  min-width: 76px;
+  min-height: 80px;
+  padding: 0 4px;
   border: 0;
   background: none;
   color: rgb(var(--fg));
@@ -203,7 +205,7 @@
   line-height: 18px;
   font-weight: 600;
   text-align: center;
-  height: 36px;
+  white-space: nowrap;
 }
 .filter.on .filter-label {color: rgb(var(--accent))}
 .filter:focus-visible {outline: 2px solid rgb(var(--focus)); outline-offset: 2px; border-radius: 12px}
@@ -228,8 +230,8 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 32px;
-  height: 96px;
+  width: 48px;
+  height: 80px;
   pointer-events: none;
   background: linear-gradient(90deg, transparent, rgb(var(--ground)));
   transition: opacity .18s ease;
@@ -244,7 +246,7 @@
   max-width: 42rem;
   bottom: 0;
   z-index: 20;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(12px + var(--un-safe-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
 /* A closed question shows the first two lines of its answer. */
@@ -399,6 +401,22 @@ select.field {appearance: none; background-image: none}
 .tip-ic.sapi {background: rgb(var(--earth-bg)); color: rgb(var(--earth))}
 .tip-ic.kambing {background: rgb(var(--straw-bg)); color: rgb(var(--straw))}
 .tip-ic.ayam {background: rgb(var(--surface)); color: rgb(var(--accent))}
+.tip-title {flex: 1; min-width: 0}
+.tip-close {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -6px -8px -6px 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: rgb(var(--muted));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.tip-close:focus-visible {outline: 2px solid rgb(var(--focus)); outline-offset: 2px}
 .tip-kicker {font-size: 14px; line-height: 20px; font-weight: 700; color: rgb(var(--accent))}
 .tip-cat {font-size: 14px; line-height: 20px; color: rgb(var(--muted))}
 .tip-text {font-size: 16px; line-height: 24px}

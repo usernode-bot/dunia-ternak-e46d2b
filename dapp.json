@@ -42,6 +42,16 @@
       ]
     },
     {
+      "id": "faq-tip-close",
+      "name": "FAQ tip for all animals can be closed",
+      "path": "/#faq",
+      "expectSelector": "#tip-card:not([hidden]) #tip-close",
+      "expectText": "Catat tanggal vaksin dan obat cacing",
+      "impact": [
+        "public/**"
+      ]
+    },
+    {
       "id": "faq-round-filter",
       "name": "FAQ round animal filter",
       "path": "/#faq",
