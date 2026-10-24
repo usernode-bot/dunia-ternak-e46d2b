@@ -5,7 +5,9 @@ Homeroom. Satu layar dengan empat tab:
 
 - **FAQ**: 15 pertanyaan umum soal sapi, kambing dan domba, ayam, serta
   urusan kandang. Ada kolom cari dan saringan per hewan; tiap pertanyaan
-  dibuka dan ditutup dengan sekali ketuk.
+  dibuka dan ditutup dengan sekali ketuk. Logo bulat di header berisi sapi,
+  kambing dan ayam dan berganti mengikuti hewan yang dipilih, dan catatan
+  ⓘ dibuka dengan semboyan "Semua ternak, satu aplikasi".
 - **Ternakku**: catatan ternak milik sendiri. Tiap ternak punya nama atau
   nomor telinga, jenis, umur, foto, catatan berat, pengingat vaksin, obat
   cacing, perkiraan lahir dan jadwal timbang, grafik pertumbuhan, serta

@@ -63,7 +63,9 @@
   })();
   </script>
   <title>TernakKu</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%233a6346'/><path d='M30 38l10 6M70 38l-10 6M32 36h36l3 20a21 21 0 0 1-42 0z' fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <!-- The favicon is the app mark: a cow, a goat and a hen in one circle,
+       drawn from the same paths as the animal markers in ICONS. -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='24' fill='%233a6346'/><g fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' transform='translate(0 4.5)'><g transform='translate(18 5) scale(.5)'><path d='M7 7C4 7 3 5 3 3M17 7c3 0 4-2 4-4'/><path d='M7 9H4M17 9h3'/><path d='M7 6h10v7H7z'/><rect x='8' y='13' width='8' height='7' rx='2'/><path d='M10.5 16.5v.01M13.5 16.5v.01'/></g><g transform='translate(8 22) scale(.5)'><path d='M9 6C8 4 6 3 4 4M15 6c1-2 3-3 5-2'/><path d='M9 8l-4 2M15 8l4 2'/><path d='M9 6h6l-1 9h-4z'/><path d='M11 15l1 5 1-5'/></g><g transform='translate(27 22) scale(.5)'><path d='M8 8c0-2 1.5-3 2.5-2 .2-2 2.5-2 2.8 0 1-1 2.4-.2 2.4 1.7'/><circle cx='11' cy='13' r='6'/><path d='M17 11l4 2-4 2'/><path d='M12.5 11v.01'/><path d='M16 16c1.4 0 1.4 2.6 0 2.6'/></g></g></svg>">
   <!-- Tailwind, PRECOMPILED for this app (see tailwind.config.js). npm run
        build compiles it to public/tailwind.css. Write class names as whole
        literals: the compiler finds them by scanning this file. -->
@@ -96,8 +98,8 @@
 
       <!-- ── FAQ ──────────────────────────────────────────────────────── -->
       <main id="view-faq" class="view">
-        <div class="hd"><div><b>TernakKu</b><span id="greeting">Jawaban praktis untuk peternak kecil</span></div><button type="button" class="info" data-info aria-expanded="false" aria-label="Tentang jawaban di aplikasi ini"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg></button></div>
-        <p class="safety" role="note" hidden>Informasi umum, bukan pengganti dokter hewan. Untuk penyakit menular, hewan darurat, atau obat keras, hubungi dokter hewan atau dinas peternakan.</p>
+        <div class="hd"><span class="hd-mark semua" id="faq-mark" data-cat="semua" aria-hidden="true"></span><div><b>TernakKu</b><span id="greeting">Jawaban praktis untuk peternak kecil</span></div><button type="button" class="info" data-info aria-expanded="false" aria-label="Tentang jawaban di aplikasi ini"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg></button></div>
+        <p class="safety" role="note" hidden><b class="tagline" data-tagline>Semua ternak, satu aplikasi</b>Informasi umum, bukan pengganti dokter hewan. Untuk penyakit menular, hewan darurat, atau obat keras, hubungi dokter hewan atau dinas peternakan.</p>
         <div class="sw">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
           <input id="faq-search" class="field" type="search" placeholder="Cari, mis. kembung" aria-label="Cari pertanyaan">
@@ -352,6 +354,10 @@
       ayam: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8c0-2 1.5-3 2.5-2 .2-2 2.5-2 2.8 0 1-1 2.4-.2 2.4 1.7"/><circle cx="11" cy="13" r="6"/><path d="M17 11l4 2-4 2"/><path d="M12.5 11v.01"/><path d="M16 16c1.4 0 1.4 2.6 0 2.6"/></svg>',
       umum: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l8-6 8 6"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg>'
     };
+    // The app mark: the cow, goat and hen drawings in one circle, used for
+    // the browser tab and for the FAQ header while "Semua" is picked. Same
+    // paths as ICONS, drawn smaller.
+    var LOGO = '<svg width="32" height="32" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(0 4.5)"><g transform="translate(18 5) scale(.5)"><path d="M7 7C4 7 3 5 3 3M17 7c3 0 4-2 4-4"/><path d="M7 9H4M17 9h3"/><path d="M7 6h10v7H7z"/><rect x="8" y="13" width="8" height="7" rx="2"/><path d="M10.5 16.5v.01M13.5 16.5v.01"/></g><g transform="translate(8 22) scale(.5)"><path d="M9 6C8 4 6 3 4 4M15 6c1-2 3-3 5-2"/><path d="M9 8l-4 2M15 8l4 2"/><path d="M9 6h6l-1 9h-4z"/><path d="M11 15l1 5 1-5"/></g><g transform="translate(27 22) scale(.5)"><path d="M8 8c0-2 1.5-3 2.5-2 .2-2 2.5-2 2.8 0 1-1 2.4-.2 2.4 1.7"/><circle cx="11" cy="13" r="6"/><path d="M17 11l4 2-4 2"/><path d="M12.5 11v.01"/><path d="M16 16c1.4 0 1.4 2.6 0 2.6"/></g></g></svg>';
     var ANIMAL = { sapi: 'Sapi', kambing: 'Kambing & Domba', ayam: 'Ayam', umum: 'Umum' };
     // The animal record names each kind separately; "Kambing & Domba" is the
     // FAQ/forum filter's grouping, not a kind a farmer picks there.
@@ -884,6 +890,17 @@
       document.getElementById('tip-text').textContent = TIPS[cat];
     }
 
+    // The FAQ header mark follows that tab's animal filter: the mixed logo
+    // for "Semua", the chosen animal's own marker otherwise.
+    function renderFaqMark() {
+      var m = document.getElementById('faq-mark');
+      if (!m) return;
+      var cat = faqCat === 'semua' || ICONS[faqCat] ? faqCat : 'umum';
+      m.className = 'hd-mark ' + cat;
+      m.setAttribute('data-cat', cat);
+      m.innerHTML = cat === 'semua' ? LOGO : ICONS[cat];
+    }
+
     function setChips(group, cat) {
       group.querySelectorAll('[data-cat]').forEach(function (c) {
         var on = c.getAttribute('data-cat') === cat;
@@ -904,6 +921,7 @@
       setChips(faqChips, faqCat);
       renderFaq();
       renderTip();
+      renderFaqMark();
       faqSearch.focus();
     });
     document.getElementById('tip-close').addEventListener('click', function () {
@@ -918,6 +936,7 @@
       revealFilter(chip);
       renderFaq();
       renderTip();
+      renderFaqMark();
     });
 
     // ── Header: greeting and the safety note behind ⓘ ──────────────────────
@@ -1091,6 +1110,7 @@
 
     renderFaq();
     renderTip();
+    renderFaqMark();
     requestAnimationFrame(function () { syncFilterHint(faqChips); });
 
     // ── Forum ──────────────────────────────────────────────────────────────
