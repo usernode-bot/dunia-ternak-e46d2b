@@ -336,6 +336,7 @@ select.field {appearance: none; background-image: none}
    beats .hd span's muted colour, and this stays a span so .hd div's flex
    does not stretch it. */
 .hd > .hd-mark {width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none}
+.hd > .hd-mark.semua svg {width: 32px; height: 32px; display: block}
 .hd > .hd-mark.semua {background: rgb(var(--accent-soft)); color: rgb(var(--accent))}
 .hd > .hd-mark.sapi {background: rgb(var(--earth-bg)); color: rgb(var(--earth))}
 .hd > .hd-mark.kambing {background: rgb(var(--straw-bg)); color: rgb(var(--straw))}
